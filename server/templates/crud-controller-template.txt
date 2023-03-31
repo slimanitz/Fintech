@@ -1,0 +1,38 @@
+const httpStatus = require('http-status');
+const { __ENTITY__Service } = require('../services/__ENTITY__');
+
+const create = async (req, res) => {
+  const new__ENTITY__ = await __ENTITY__Service.create(req.body);
+  res.status(httpStatus.OK).json(new__ENTITY__);
+};
+
+const getAll = async (req, res) => {
+  const __ENTITY__s = await __ENTITY__Service.getAll();
+  res.status(httpStatus.OK).json(__ENTITY__s);
+};
+
+const get = async (req, res) => {
+  const { id } = req.params;
+  const __ENTITY__ = await __ENTITY__Service.get(id);
+  res.status(httpStatus.OK).json(__ENTITY__);
+};
+
+const update = async (req, res) => {
+  const { id } = req.params;
+  const __ENTITY__ = await __ENTITY__Service.update(id, req.body);
+  res.status(httpStatus.OK).json(__ENTITY__);
+};
+
+const remove = async (req, res) => {
+  const { id } = req.params;
+  const __ENTITY__ = await __ENTITY__Service.remove(id, req.body);
+  res.status(httpStatus.OK).json(__ENTITY__);
+};
+
+module.exports = {
+  create,
+  get,
+  getAll,
+  update,
+  remove,
+};

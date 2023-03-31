@@ -1,0 +1,54 @@
+const httpStatus = require('http-status');
+const Joi = require('joi');
+const __MODEL__ = require('../models/__ENTITY__');
+const APIError = require('../../utils/api-error');
+
+const schema = Joi.object({
+__SCHEMA__
+});
+
+const create = async (__ENTITY__) => {
+  const { error, value } = schema.validate(__ENTITY__);
+  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  const new__MODEL__ = new __MODEL__(value);
+  await new__MODEL__.save();
+  return new__MODEL__;
+};
+
+const get = async (id) => {
+  if (!ObjectId.isValid(id)) {
+    throw new APIError({ message: 'No __ENTITY__ found', status: httpStatus.NOT_FOUND });
+  }
+  const __ENTITY__ = await __MODEL__.findById(id);
+  if (!__ENTITY__) throw new APIError({ message: 'No __ENTITY__ found', status: httpStatus.NOT_FOUND });
+  return __ENTITY__;
+};
+
+const getAll = async () => {
+  const __ENTITY__s = await __MODEL__.find();
+  return __ENTITY__s;
+};
+
+const update = async (id, payload) => {
+  if (!ObjectId.isValid(id)) {
+    throw new APIError({ message: 'No __ENTITY__ found', status: httpStatus.NOT_FOUND });
+  }
+  const { error, value } = schema.validate(payload);
+  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  const updatedValue = await __MODEL__.findByIdAndUpdate(id, value);
+  if (!updatedValue) throw new APIError({ message: 'No __ENTITY__ found', status: httpStatus.NOT_FOUND });
+  return updatedValue;
+};
+
+const remove = async (id) => {
+  const __ENTITY__ = await get(id);
+  await __MODEL__.findByIdAndDelete(id);
+};
+
+module.exports.__ENTITY__Service = {
+  create,
+  get,
+  getAll,
+  update,
+  remove,
+};

@@ -1,0 +1,15 @@
+const mongoose = require('mongoose');
+// eslint-disable-next-line no-unused-vars
+const mongoClient = require('../../config/database');
+
+const __ENTITY__Schema = new mongoose.Schema(
+  {
+__FIELDS__
+  },
+  { timestamps: true },
+  { versionKey: false },
+);
+
+const __MODEL__ = mongoose.model('__ENTITY__', __ENTITY__Schema);
+
+module.exports = __MODEL__;
