@@ -3,13 +3,14 @@ const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
+const { transactionGatewayEnum, transactionStatusEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
   creditAccount: Joi.string().required(),
-  debitAccount: Joi.string().required(),
+  debitAccount: Joi.string(),
   ammount: Joi.number().required(),
-  isCompleted: Joi.boolean().required(),
-  gateway: Joi.string().required(),
+  status: Joi.boolean().valid(...transactionStatusEnum),
+  gateway: Joi.string().valid(...transactionGatewayEnum).required(),
   comment: Joi.string().required(),
 
 });
