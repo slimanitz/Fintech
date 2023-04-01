@@ -1,14 +1,16 @@
 const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
+const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const User = require('../models/user');
 const APIError = require('../../utils/api-error');
+const { jwtSecret } = require('../../config/vars');
 
 const schema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
   isActive: Joi.boolean().required(),
-
 });
 
 const create = async (user) => {
@@ -17,6 +19,14 @@ const create = async (user) => {
   const newUser = new User(value);
   await newUser.save();
   return newUser;
+};
+
+const login = async ({ email, password }) => {
+  const hashpassword = crypto.createHash('sha1').update(password, 'binary').digest('hex');
+  const user = await User.findOne({ email, password: hashpassword });
+  if (!user) throw new APIError({ message: 'Wrong credentials', status: httpStatus.UNAUTHORIZED });
+  const token = jwt.sign({ user }, jwtSecret);
+  return token;
 };
 
 const get = async (id) => {
@@ -28,8 +38,8 @@ const get = async (id) => {
   return user;
 };
 
-const getAll = async () => {
-  const users = await User.find();
+const getAll = async (filters) => {
+  const users = await User.find({ ...filters });
   return users;
 };
 
@@ -45,7 +55,7 @@ const update = async (id, payload) => {
 };
 
 const remove = async (id) => {
-  const user = await get(id);
+  await get(id);
   await User.findByIdAndDelete(id);
 };
 
@@ -55,4 +65,5 @@ module.exports.userService = {
   getAll,
   update,
   remove,
+  login,
 };
