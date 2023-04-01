@@ -8,7 +8,7 @@ const APIError = require('../utils/api-error');
 // I made a specific login in this middleware where I've make a verification
 // if the user is using a good Agency ID and Iam checking as well on the database if it's coherent
 
-const authenticateJWT = (role) => (req, res, next) => {
+const authenticateJWT = (roles) => (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -22,7 +22,7 @@ const authenticateJWT = (role) => (req, res, next) => {
         const { user } = payload;
         const dbUser = await User.findById(user._id);
 
-        if (dbUser && dbUser.role === role) {
+        if (dbUser && roles.includes(dbUser.role)) {
           req.user = dbUser;
           return next();
         }
