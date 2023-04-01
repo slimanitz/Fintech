@@ -6,7 +6,7 @@ const connect = require('../config/database');
 const User = require('../api/models/user');
 const Account = require('../api/models/account');
 const CreditCard = require('../api/models/creditCard');
-const { userRoles } = require('../utils/enums');
+const { userRolesEnum } = require('../utils/enums');
 
 const main = async () => {
   await connect();
@@ -20,7 +20,7 @@ const main = async () => {
       name: faker.name.fullName(),
       email: faker.internet.email(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
-      role: userRoles[Math.floor(Math.random() * userRoles.length)],
+      role: userRolesEnum[Math.floor(Math.random() * userRolesEnum.length)],
     });
   }
   users = await User.insertMany(users);

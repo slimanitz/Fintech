@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line no-unused-vars
 const mongoClient = require('../../config/database');
-const { userRoles } = require('../../utils/enums');
+const { userRolesEnum } = require('../../utils/enums');
 
 const userSchema = new mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String },
     password: { type: String },
     isActive: { type: Boolean },
-    roles: { type: String, enum: userRoles, default: userRoles[0] },
+    role: { type: String, enum: userRolesEnum, default: userRolesEnum[0] },
 
   },
   { timestamps: true },

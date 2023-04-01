@@ -1,21 +1,25 @@
 const httpStatus = require('http-status');
 const { ObjectId } = require('mongoose').Types;
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const User = require('../models/user');
 const APIError = require('../../utils/api-error');
 const { jwtSecret } = require('../../config/vars');
+const { userRolesEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-  isActive: Joi.boolean().required(),
+  isActive: Joi.boolean(),
+  role: Joi.string().valid(...userRolesEnum),
 });
 
 const create = async (user) => {
   const { error, value } = schema.validate(user);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  value.password = crypto.createHash('sha1').update(value.password, 'binary').digest('hex');
   const newUser = new User(value);
   await newUser.save();
   return newUser;
@@ -25,7 +29,7 @@ const login = async ({ email, password }) => {
   const hashpassword = crypto.createHash('sha1').update(password, 'binary').digest('hex');
   const user = await User.findOne({ email, password: hashpassword });
   if (!user) throw new APIError({ message: 'Wrong credentials', status: httpStatus.UNAUTHORIZED });
-  const token = jwt.sign({ user }, jwtSecret);
+  const token = jwt.sign({ user }, jwtSecret, { expiresIn: '2h' });
   return token;
 };
 
