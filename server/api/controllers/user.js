@@ -8,7 +8,7 @@ const create = async (req, res) => {
 
 const login = async (req, res) => {
   const token = await userService.login(req.body);
-  res.status(httpStatus.OK).json(token);
+  res.status(httpStatus.OK).json({ token });
 };
 
 const getAll = async (req, res) => {
