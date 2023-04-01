@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line no-unused-vars
+const { faker } = require('@faker-js/faker');
 const mongoClient = require('../../config/database');
 const { accountTypesEnum } = require('../../utils/enums');
 
 const accountSchema = new mongoose.Schema(
   {
     owner: { type: mongoose.Types.ObjectId },
-    iban: { type: String },
-    type: { type: String, enum: accountTypesEnum },
-    balance: { type: Number },
-    isActive: { type: Boolean },
+    iban: { type: String, default: faker.finance.iban() },
+    type: { type: String, enum: accountTypesEnum.values(), default: accountTypesEnum.BASIC },
+    balance: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
 
   },
   { timestamps: true },
