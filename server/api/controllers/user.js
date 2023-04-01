@@ -6,6 +6,11 @@ const create = async (req, res) => {
   res.status(httpStatus.OK).json(newuser);
 };
 
+const login = async (req, res) => {
+  const token = await userService.login(req.body);
+  res.status(httpStatus.OK).json(token);
+};
+
 const getAll = async (req, res) => {
   const users = await userService.getAll(req.query);
   res.status(httpStatus.OK).json(users);
@@ -35,4 +40,6 @@ module.exports = {
   getAll,
   update,
   remove,
+  login,
+
 };
