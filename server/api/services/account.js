@@ -3,11 +3,12 @@ const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Account = require('../models/account');
 const APIError = require('../../utils/api-error');
+const { accountTypesEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
   owner: Joi.string().required(),
   iban: Joi.string().required(),
-  type: Joi.string().required(),
+  type: Joi.string().valid(...accountTypesEnum).required(),
   balance: Joi.number().required(),
   isActive: Joi.boolean().required(),
 
