@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String },
     password: { type: String },
     isActive: { type: Boolean },
-    role: { type: String, enum: userRolesEnum, default: userRolesEnum[0] },
+    role: { type: String, enum: userRolesEnum.values(), default: userRolesEnum.CLIENT },
 
   },
   { timestamps: true },
