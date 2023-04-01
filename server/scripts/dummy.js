@@ -19,7 +19,6 @@ const main = async () => {
       name: faker.name.fullName(),
       email: faker.internet.email(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
-
     });
   }
   users = await User.insertMany(users);
