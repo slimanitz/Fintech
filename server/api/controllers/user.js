@@ -7,7 +7,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const users = await userService.getAll();
+  const users = await userService.getAll(req.query);
   res.status(httpStatus.OK).json(users);
 };
 
