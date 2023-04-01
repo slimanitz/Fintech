@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Account = require('../models/account');
 const APIError = require('../../utils/api-error');
@@ -29,8 +30,8 @@ const get = async (id) => {
   return account;
 };
 
-const getAll = async () => {
-  const accounts = await Account.find();
+const getAll = async (filters) => {
+  const accounts = await Account.find({ ...filters });
   return accounts;
 };
 
@@ -46,7 +47,7 @@ const update = async (id, payload) => {
 };
 
 const remove = async (id) => {
-  const account = await get(id);
+  await get(id);
   await Account.findByIdAndDelete(id);
 };
 

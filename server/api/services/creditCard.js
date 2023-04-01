@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const CreditCard = require('../models/creditCard');
 const APIError = require('../../utils/api-error');
@@ -31,8 +32,8 @@ const get = async (id) => {
   return creditCard;
 };
 
-const getAll = async () => {
-  const creditCards = await CreditCard.find();
+const getAll = async (filters) => {
+  const creditCards = await CreditCard.find({ ...filters });
   return creditCards;
 };
 
@@ -48,7 +49,7 @@ const update = async (id, payload) => {
 };
 
 const remove = async (id) => {
-  const creditCard = await get(id);
+  await get(id);
   await CreditCard.findByIdAndDelete(id);
 };
 

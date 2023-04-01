@@ -7,7 +7,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const transactions = await transactionService.getAll();
+  const transactions = await transactionService.getAll(req.query);
   res.status(httpStatus.OK).json(transactions);
 };
 

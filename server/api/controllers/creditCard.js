@@ -7,7 +7,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const creditCards = await creditCardService.getAll();
+  const creditCards = await creditCardService.getAll(req.query);
   res.status(httpStatus.OK).json(creditCards);
 };
 

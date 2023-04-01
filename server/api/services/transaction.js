@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
@@ -30,8 +31,8 @@ const get = async (id) => {
   return transaction;
 };
 
-const getAll = async () => {
-  const transactions = await Transaction.find();
+const getAll = async (filters) => {
+  const transactions = await Transaction.find({ ...filters });
   return transactions;
 };
 
@@ -47,7 +48,7 @@ const update = async (id, payload) => {
 };
 
 const remove = async (id) => {
-  const transaction = await get(id);
+  await get(id);
   await Transaction.findByIdAndDelete(id);
 };
 

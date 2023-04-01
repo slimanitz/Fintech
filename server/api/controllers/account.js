@@ -7,7 +7,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const accounts = await accountService.getAll();
+  const accounts = await accountService.getAll(req.query);
   res.status(httpStatus.OK).json(accounts);
 };
 
