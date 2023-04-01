@@ -7,10 +7,10 @@ const { accountTypesEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
   owner: Joi.string().required(),
-  iban: Joi.string().required(),
-  type: Joi.string().valid(...accountTypesEnum).required(),
-  balance: Joi.number().required(),
-  isActive: Joi.boolean().required(),
+  iban: Joi.string(),
+  type: Joi.string().valid(...accountTypesEnum.values()),
+  balance: Joi.number(),
+  isActive: Joi.boolean(),
 
 });
 

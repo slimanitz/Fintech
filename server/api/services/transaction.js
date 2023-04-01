@@ -9,8 +9,8 @@ const schema = Joi.object({
   creditAccount: Joi.string().required(),
   debitAccount: Joi.string(),
   ammount: Joi.number().required(),
-  status: Joi.boolean().valid(...transactionStatusEnum),
-  gateway: Joi.string().valid(...transactionGatewayEnum).required(),
+  status: Joi.boolean().valid(...transactionStatusEnum.values()),
+  gateway: Joi.string().valid(...transactionGatewayEnum.values()).required(),
   comment: Joi.string().required(),
 
 });

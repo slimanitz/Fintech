@@ -8,8 +8,12 @@ const transactionSchema = new mongoose.Schema(
     creditAccount: { type: mongoose.Types.ObjectId, required: true },
     debitAccount: { type: mongoose.Types.ObjectId },
     ammount: { type: Number },
-    status: { type: String, enum: transactionStatusEnum },
-    gateway: { type: String, enum: transactionGatewayEnum },
+    status: {
+      type: String,
+      enum: transactionStatusEnum.values(),
+      default: transactionStatusEnum.PENDING,
+    },
+    gateway: { type: String, enum: transactionGatewayEnum.values() },
     comment: { type: String },
 
   },
