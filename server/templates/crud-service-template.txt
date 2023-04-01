@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const __MODEL__ = require('../models/__ENTITY__');
 const APIError = require('../../utils/api-error');
@@ -24,8 +25,8 @@ const get = async (id) => {
   return __ENTITY__;
 };
 
-const getAll = async () => {
-  const __ENTITY__s = await __MODEL__.find();
+const getAll = async (filters) => {
+  const __ENTITY__s = await __MODEL__.find({ ...filters });
   return __ENTITY__s;
 };
 
@@ -41,7 +42,7 @@ const update = async (id, payload) => {
 };
 
 const remove = async (id) => {
-  const __ENTITY__ = await get(id);
+  await get(id);
   await __MODEL__.findByIdAndDelete(id);
 };
 

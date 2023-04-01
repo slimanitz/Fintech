@@ -7,7 +7,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-  const __ENTITY__s = await __ENTITY__Service.getAll();
+  const __ENTITY__s = await __ENTITY__Service.getAll(req.query);
   res.status(httpStatus.OK).json(__ENTITY__s);
 };
 
