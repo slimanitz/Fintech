@@ -10,7 +10,7 @@ const mongooseTypes = {
   string: '{ type: String }',
   int: '{ type: Number }',
   date: '{ type: Date, default: Date.now }',
-  double: '{ type: mongoose.Decimal128 }',
+  double: '{ type: mongoose.Types.Decimal128 }',
   boolean: '{ type: Boolean }',
   id: '{ type: mongoose.Types.ObjectId }',
   array: '[{ type: String }]',

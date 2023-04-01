@@ -9,8 +9,8 @@ const creditCardSchema = new mongoose.Schema(
     isActive: { type: Boolean },
     securityCode: { type: String },
     account: { type: mongoose.Types.ObjectId },
-    allowedLimit: { type: mongoose.Decimal128 },
-    limitUsage: { type: mongoose.Decimal128 },
+    allowedLimit: { type: mongoose.Types.Decimal128 },
+    limitUsage: { type: mongoose.Types.Decimal128 },
 
   },
   { timestamps: true },
