@@ -13,7 +13,7 @@ const schema = Joi.object({
   email: Joi.string().required(),
   password: Joi.string().required(),
   isActive: Joi.boolean(),
-  role: Joi.string().valid(...userRolesEnum.values()),
+  role: Joi.string().valid(...Object.values(userRolesEnum)),
 });
 
 const create = async (user) => {

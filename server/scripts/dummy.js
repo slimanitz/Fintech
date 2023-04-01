@@ -19,7 +19,8 @@ const main = async () => {
       name: faker.name.fullName(),
       email: faker.internet.email(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
-      role: userRolesEnum.values()[Math.floor(Math.random() * userRolesEnum.values().length)],
+      role: Object
+        .values(userRolesEnum)[Math.floor(Math.random() * Object.values(userRolesEnum).length)],
     });
   }
   users = await User.insertMany(users);
@@ -28,7 +29,9 @@ const main = async () => {
   for (let index = 0; index < 1000; index++) {
     accounts.push({
       owner: users[Math.floor(Math.random() * users.length)],
-      type: accountTypesEnum.values()[Math.floor(Math.random() * accountTypesEnum.values().length)],
+      type: Object
+        .values(accountTypesEnum)[Math.floor(Math.random() * Object
+          .values(accountTypesEnum).length)],
       balance: (300000 * Math.random()).toFixed(2),
       isActive: Math.random() < 0.5,
       iban: faker.finance.iban(),

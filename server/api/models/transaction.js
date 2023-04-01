@@ -10,10 +10,10 @@ const transactionSchema = new mongoose.Schema(
     ammount: { type: Number },
     status: {
       type: String,
-      enum: transactionStatusEnum.values(),
+      enum: Object.values(transactionStatusEnum),
       default: transactionStatusEnum.PENDING,
     },
-    gateway: { type: String, enum: transactionGatewayEnum.values() },
+    gateway: { type: String, enum: Object.values(transactionGatewayEnum) },
     comment: { type: String },
 
   },
