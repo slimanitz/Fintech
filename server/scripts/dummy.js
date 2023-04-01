@@ -6,14 +6,13 @@ const connect = require('../config/database');
 const User = require('../api/models/user');
 const Account = require('../api/models/account');
 const CreditCard = require('../api/models/creditCard');
-const { userRolesEnum } = require('../utils/enums');
+const { userRolesEnum, accountTypesEnum } = require('../utils/enums');
 
 const main = async () => {
   await connect();
   let users = [];
   let accounts = [];
   let creditCards = [];
-  const ACCOUNT_TYPES = ['Basic', 'Saving'];
 
   for (let index = 0; index < 100; index++) {
     users.push({
@@ -29,7 +28,7 @@ const main = async () => {
   for (let index = 0; index < 1000; index++) {
     accounts.push({
       owner: users[Math.floor(Math.random() * users.length)],
-      type: ACCOUNT_TYPES[Math.floor(Math.random() * ACCOUNT_TYPES.length)],
+      type: accountTypesEnum[Math.floor(Math.random() * accountTypesEnum.length)],
       balance: (300000 * Math.random()).toFixed(2),
       isActive: Math.random() < 0.5,
       iban: faker.finance.iban(),
