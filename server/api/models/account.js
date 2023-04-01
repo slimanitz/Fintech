@@ -7,7 +7,7 @@ const accountSchema = new mongoose.Schema(
     owner: { type: mongoose.Types.ObjectId },
     iban: { type: String },
     type: { type: String },
-    balance: { type: mongoose.Types.Decimal128 },
+    balance: { type: Number },
     isActive: { type: Boolean },
 
   },
