@@ -5,7 +5,7 @@ const { transactionStatusEnum, transactionGatewayEnum } = require('../../utils/e
 
 const transactionSchema = new mongoose.Schema(
   {
-    creditAccount: { type: mongoose.Types.ObjectId },
+    creditAccount: { type: mongoose.Types.ObjectId, required: true },
     debitAccount: { type: mongoose.Types.ObjectId },
     ammount: { type: Number },
     status: { type: String, enum: transactionStatusEnum },
