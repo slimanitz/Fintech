@@ -26,7 +26,7 @@ router.delete('/:id', remove);
 
 // Accounts
 router.post('/:userId/accounts', authenticateJWT([userRolesEnum.CLIENT]), createUserAccount);
-router.get('/:userId/accounts', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, getAllUserAccounts);
+router.get('/:userId/accounts', authenticateJWT([userRolesEnum.CLIENT]), getAllUserAccounts);
 router.get('/:userId/accounts/:accountId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, getUserAccount);
 router.patch('/:userId/accounts/:accountId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, updateUserAccount);
 
