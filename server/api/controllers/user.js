@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { userService } = require('../services/user');
 const { accountService } = require('../services/account');
 const { creditCardService } = require('../services/creditCard');
+const { transactionService } = require('../services/transaction');
 
 // USER
 const create = async (req, res) => {
@@ -58,20 +59,36 @@ const updateUserAccount = async (req, res) => {
 // Credit Card
 
 const createUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.createUserAccountCreditCard(req.params);
-  res.status(httpStatus.OK).json(account);
+  const creditCard = await creditCardService.createUserAccountCreditCard(req.params);
+  res.status(httpStatus.OK).json(creditCard);
 };
 const getAllUserAccountCreditCards = async (req, res) => {
-  const accounts = await creditCardService.getAllUserAccountsCreditCards(req.params, req.body);
-  res.status(httpStatus.OK).json(accounts);
+  const creditCards = await creditCardService.getAllUserAccountsCreditCards(req.params, req.body);
+  res.status(httpStatus.OK).json(creditCards);
 };
 const getUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.getUserAccountCreditCard(req.params);
-  res.status(httpStatus.OK).json(account);
+  const creditCard = await creditCardService.getUserAccountCreditCard(req.params);
+  res.status(httpStatus.OK).json(creditCard);
 };
 const updateUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.updateUserAccountCreditCard(req.params, req.body);
-  res.status(httpStatus.OK).json(account);
+  const creditCard = await creditCardService.updateUserAccountCreditCard(req.params, req.body);
+  res.status(httpStatus.OK).json(creditCard);
+};
+
+// TRANSACTIONS
+const createUserTransaction = async (req, res) => {
+  const transaction = await transactionService.createUserTransaction(req.params, req.body);
+  res.status(httpStatus.OK).json(transaction);
+};
+
+const getAllUserTransactions = async (req, res) => {
+  const transactions = await transactionService.getAllUserTransaction(req.params);
+  res.status(httpStatus.OK).json(transactions);
+};
+
+const getUserTransaction = async (req, res) => {
+  const transaction = await transactionService.getUserTransaction(req.params);
+  res.status(httpStatus.OK).json(transaction);
 };
 
 module.exports = {
@@ -89,5 +106,8 @@ module.exports = {
   getAllUserAccountCreditCards,
   getUserAccountCreditCard,
   updateUserAccountCreditCard,
+  createUserTransaction,
+  getAllUserTransactions,
+  getUserTransaction,
 
 };

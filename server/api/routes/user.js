@@ -2,8 +2,13 @@ const express = require('express');
 const {
   create, get,
   getAll, update, remove, login, createUserAccount,
-  getAllUserAccounts, getUserAccount, updateUserAccount, createUserAccountCreditCard,
-  getAllUserAccountCreditCards, getUserAccountCreditCard, updateUserAccountCreditCard,
+  getAllUserAccounts, getUserAccount,
+  updateUserAccount, createUserAccountCreditCard,
+  getAllUserAccountCreditCards,
+  getUserAccountCreditCard, updateUserAccountCreditCard,
+  createUserTransaction,
+  getAllUserTransactions,
+  getUserTransaction,
 } = require('../controllers/user');
 const { userRolesEnum } = require('../../utils/enums');
 const authenticateJWT = require('../../middlewares/auth');
@@ -29,5 +34,10 @@ router.post('/:userId/accounts/:accountId/credit-cards', authenticateJWT([userRo
 router.get('/:userId/accounts/:accountId/credit-cards', authenticateJWT([userRolesEnum.CLIENT]), getAllUserAccountCreditCards);
 router.get('/:userId/accounts/:accountId/credit-cards/:creditCardId', authenticateJWT([userRolesEnum.CLIENT]), getUserAccountCreditCard);
 router.patch('/:userId/accounts/:accountId/credit-cards/:creditCardId', authenticateJWT([userRolesEnum.CLIENT]), updateUserAccountCreditCard);
+
+// Transactions
+router.post('/:userId/accounts/:accountId/transactions', authenticateJWT([userRolesEnum.CLIENT]), createUserTransaction);
+router.get('/:userId/transactions', authenticateJWT([userRolesEnum.CLIENT]), getAllUserTransactions);
+router.get('/:userId/transactions/:transactionId', authenticateJWT([userRolesEnum.CLIENT]), getUserTransaction);
 
 module.exports = router;
