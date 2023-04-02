@@ -5,16 +5,18 @@ const { transactionStatusEnum, transactionGatewayEnum } = require('../../utils/e
 
 const transactionSchema = new mongoose.Schema(
   {
-    creditAccount: { type: mongoose.Types.ObjectId, required: true },
-    debitAccount: { type: mongoose.Types.ObjectId },
-    ammount: { type: Number },
+    creditAccount: { type: mongoose.Types.ObjectId, required: true, ref: 'account' },
+    debitAccount: { type: mongoose.Types.ObjectId, ref: 'account' },
+    userId: { type: mongoose.Types.ObjectId, ref: 'user' },
+    ammount: { type: Number, required: true },
     status: {
       type: String,
       enum: Object.values(transactionStatusEnum),
       default: transactionStatusEnum.PENDING,
     },
     gateway: { type: String, enum: Object.values(transactionGatewayEnum) },
-    comment: { type: String },
+    gatewayId: { type: mongoose.Types.ObjectId, required: true },
+    comment: { type: String, default: '' },
 
   },
   { timestamps: true },
