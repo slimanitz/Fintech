@@ -5,10 +5,10 @@ const { userRolesEnum } = require('../../utils/enums');
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String },
-    email: { type: String },
-    password: { type: String },
-    isActive: { type: Boolean },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    isActive: { type: Boolean, default: true },
     role: { type: String, enum: Object.values(userRolesEnum), default: userRolesEnum.CLIENT },
 
   },
