@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
+const { faker } = require('@faker-js/faker');
 const CreditCard = require('../models/creditCard');
 const APIError = require('../../utils/api-error');
 
@@ -69,11 +70,12 @@ const createUserAccountCreditCard = async ({ userId, accountId }) => {
   }
   const { error, value } = userCreationSchema.validate({ userId, accountId });
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const creditCard = CreditCard.create(value);
+  value.number = faker.finance.creditCardNumber().replaceAll('-', '');
+  const creditCard = await CreditCard.create(value);
   return creditCard;
 };
 
-const getAllUserAccountsCreditCards = async ({ userId }) => {
+const getAllUsersCreditCards = async ({ userId }) => {
   if (!ObjectId.isValid(userId)) {
     throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
   }
@@ -81,22 +83,22 @@ const getAllUserAccountsCreditCards = async ({ userId }) => {
   return creditCards;
 };
 
-const getUserAccountCreditCard = async ({ userId, accountId }) => {
-  if (!ObjectId.isValid(accountId) || !ObjectId.isValid(userId)) {
+const getUserCreditCard = async ({ userId, creditCardId }) => {
+  if (!ObjectId.isValid(userId) || !ObjectId.isValid(creditCardId)) {
     throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
   }
-  const accounts = await CreditCard.findOne({ userId, accountId });
-  return accounts;
+  const creditCard = await CreditCard.findOne({ _id: creditCardId, userId });
+  return creditCard;
 };
 
-const updateUserAccountCreditCard = async ({ userId, accountId }, payload) => {
-  if (!ObjectId.isValid(accountId) || !ObjectId.isValid(userId)) {
+const updateUserCreditCard = async ({ userId, creditCardId }, payload) => {
+  if (!ObjectId.isValid(userId) || !ObjectId.isValid(creditCardId)) {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
   const { error, value } = updateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await CreditCard
-    .findOneAndUpdate({ accountId, userId }, { $set: value }, { new: true });
+    .findOneAndUpdate({ _id: creditCardId, userId }, { $set: value }, { new: true });
   if (!updatedValue) throw new APIError({ message: 'No Credit card found found', status: httpStatus.NOT_FOUND });
   return updatedValue;
 };
@@ -108,7 +110,7 @@ module.exports.creditCardService = {
   update,
   remove,
   createUserAccountCreditCard,
-  getAllUserAccountsCreditCards,
-  getUserAccountCreditCard,
-  updateUserAccountCreditCard,
+  getAllUsersCreditCards,
+  getUserCreditCard,
+  updateUserCreditCard,
 };
