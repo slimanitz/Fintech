@@ -3,7 +3,7 @@ const {
   create, get,
   getAll, update, remove, login, createUserAccount,
   getAllUserAccounts, getUserAccount, updateUserAccount, createUserAccountCreditCard,
-  getAllUserAccountCreditCards, getUserAccountCreditCard,
+  getAllUserAccountCreditCards, getUserAccountCreditCard, updateUserAccountCreditCard,
 } = require('../controllers/user');
 const { userRolesEnum } = require('../../utils/enums');
 const authenticateJWT = require('../../middlewares/auth');

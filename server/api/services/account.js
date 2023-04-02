@@ -86,7 +86,7 @@ const getUserAccount = async ({ userId, accountId }) => {
   return accounts;
 };
 
-const updateUserAccount = async ({ userId, accountId }, payload) => {
+const updateUserAccountCreditCard = async ({ userId, accountId }, payload) => {
   if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
@@ -107,5 +107,5 @@ module.exports.accountService = {
   createUserAccount,
   getAllUserAccounts,
   getUserAccount,
-  updateUserAccount,
+  updateUserAccountCreditCard,
 };
