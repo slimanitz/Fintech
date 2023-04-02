@@ -5,12 +5,17 @@ const mongoClient = require('../../config/database');
 const creditCardSchema = new mongoose.Schema(
   {
     number: { type: String },
-    expirationDate: { type: Date, default: Date.now },
-    isActive: { type: Boolean },
+    expirationDate: {
+      type: Date,
+      default: new Date(new Date()
+        .setFullYear(new Date()
+          .getFullYear() + 2)),
+    },
+    isActive: { type: Boolean, default: true },
     securityCode: { type: String },
     account: { type: mongoose.Types.ObjectId },
-    allowedLimit: { type: mongoose.Types.Decimal128 },
-    limitUsage: { type: mongoose.Types.Decimal128 },
+    allowedLimit: { type: Number },
+    limitUsage: { type: Number, default: 0 },
 
   },
   { timestamps: true },
