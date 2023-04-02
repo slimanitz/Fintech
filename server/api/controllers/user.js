@@ -58,19 +58,19 @@ const updateUserAccount = async (req, res) => {
 // Credit Card
 
 const createUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.createUserAccount(req.params, req.body);
+  const account = await creditCardService.createUserAccountCreditCard(req.params);
   res.status(httpStatus.OK).json(account);
 };
 const getAllUserAccountCreditCards = async (req, res) => {
-  const accounts = await creditCardService.getAllUserAccounts(req.params, req.body);
+  const accounts = await creditCardService.getAllUserAccountsCreditCards(req.params, req.body);
   res.status(httpStatus.OK).json(accounts);
 };
 const getUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.getUserAccount(req.params);
+  const account = await creditCardService.getUserAccountCreditCard(req.params);
   res.status(httpStatus.OK).json(account);
 };
 const updateUserAccountCreditCard = async (req, res) => {
-  const account = await creditCardService.updateUserAccount(req.params, req.body);
+  const account = await creditCardService.updateUserAccountCreditCard(req.params, req.body);
   res.status(httpStatus.OK).json(account);
 };
 
