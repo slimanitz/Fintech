@@ -11,7 +11,7 @@ const router = express.Router();
 router.use('/users', user);
 router.use('/accounts', authenticateJWT([userRolesEnum.ADMIN]), account);
 router.use('/transactions', authenticateJWT([userRolesEnum.ADMIN]), transaction);
-router.use('/creditCards', authenticateJWT([userRolesEnum.ADMIN]), creditCard);
+router.use('/credit-cards', authenticateJWT([userRolesEnum.ADMIN]), creditCard);
 // __ROUTE__
 
 module.exports = router;
