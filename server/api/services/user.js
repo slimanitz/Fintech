@@ -27,7 +27,7 @@ const create = async (user) => {
 
 const login = async ({ email, password }) => {
   const hashpassword = crypto.createHash('sha1').update(password, 'binary').digest('hex');
-  const user = await User.findOne({ email, password: hashpassword });
+  const user = await User.findOne({ email, password: hashpassword, isActive: true });
   if (!user) throw new APIError({ message: 'Wrong credentials', status: httpStatus.UNAUTHORIZED });
   const token = jwt.sign({ user }, jwtSecret, { expiresIn: '2h' });
   return token;
