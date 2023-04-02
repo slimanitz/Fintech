@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { userService } = require('../services/user');
 const { accountService } = require('../services/account');
+const { creditCardService } = require('../services/creditCard');
 
 // USER
 const create = async (req, res) => {
@@ -38,23 +39,38 @@ const remove = async (req, res) => {
 
 // Account
 const createUserAccount = async (req, res) => {
-  const { userId } = req.params;
-  const account = await accountService.createUserAccount(userId, req.body);
+  const account = await accountService.createUserAccount(req.params, req.body);
   res.status(httpStatus.OK).json(account);
 };
 const getAllUserAccounts = async (req, res) => {
-  const { userId } = req.params;
-  const accounts = await accountService.getAllUserAccounts(userId, req.body);
+  const accounts = await accountService.getAllUserAccounts(req.params, req.body);
   res.status(httpStatus.OK).json(accounts);
 };
 const getUserAccount = async (req, res) => {
-  const { userId, accountId } = req.params;
-  const account = await accountService.getUserAccount(userId, accountId);
+  const account = await accountService.getUserAccount(req.params);
   res.status(httpStatus.OK).json(account);
 };
 const updateUserAccount = async (req, res) => {
-  const { userId, accountId } = req.params;
-  const account = await accountService.updateUserAccount({ userId, accountId }, req.body);
+  const account = await accountService.updateUserAccount(req.params, req.body);
+  res.status(httpStatus.OK).json(account);
+};
+
+// Credit Card
+
+const createUserAccountCreditCard = async (req, res) => {
+  const account = await creditCardService.createUserAccount(req.params, req.body);
+  res.status(httpStatus.OK).json(account);
+};
+const getAllUserAccountCreditCards = async (req, res) => {
+  const accounts = await creditCardService.getAllUserAccounts(req.params, req.body);
+  res.status(httpStatus.OK).json(accounts);
+};
+const getUserAccountCreditCard = async (req, res) => {
+  const account = await creditCardService.getUserAccount(req.params);
+  res.status(httpStatus.OK).json(account);
+};
+const updateUserAccountCreditCard = async (req, res) => {
+  const account = await creditCardService.updateUserAccount(req.params, req.body);
   res.status(httpStatus.OK).json(account);
 };
 
@@ -69,5 +85,9 @@ module.exports = {
   getAllUserAccounts,
   getUserAccount,
   updateUserAccount,
+  createUserAccountCreditCard,
+  getAllUserAccountCreditCards,
+  getUserAccountCreditCard,
+  updateUserAccountCreditCard,
 
 };
