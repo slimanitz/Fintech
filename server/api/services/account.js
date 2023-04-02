@@ -12,7 +12,7 @@ const schema = Joi.object({
   type: Joi.string().valid(...Object.values(accountTypesEnum)),
   balance: Joi.number(),
   isActive: Joi.boolean(),
-  currency: Joi.string().required(),
+  currency: Joi.string(),
 
 });
 
@@ -43,6 +43,9 @@ const get = async (id) => {
 };
 
 const getAll = async (filters) => {
+  console.log('====================================');
+  console.log('test');
+  console.log('====================================');
   const accounts = await Account.find({ ...filters });
   return accounts;
 };
