@@ -13,7 +13,11 @@ const schema = Joi.object({
   userId: Joi.string().required(),
   allowedLimit: Joi.number().required(),
   limitUsage: Joi.number(),
+});
 
+const userCreationSchema = Joi.object({
+  accountId: Joi.string().required(),
+  userId: Joi.string().required(),
 });
 
 const updateSchema = Joi.object({
@@ -59,12 +63,13 @@ const remove = async (id) => {
   await CreditCard.findByIdAndDelete(id);
 };
 
-const createUserAccountCreditCard = async ({ userId, accountId }, payload) => {
+const createUserAccountCreditCard = async ({ userId, accountId }) => {
   if (!ObjectId.isValid(accountId) || !ObjectId.isValid(userId)) {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
-  let creditCard = { ...payload, accountId, userId };
-  creditCard = await create(creditCard);
+  const { error, value } = userCreationSchema.validate({ userId, accountId });
+  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  const creditCard = CreditCard.create(value);
   return creditCard;
 };
 
