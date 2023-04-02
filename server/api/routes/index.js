@@ -9,9 +9,9 @@ const { userRolesEnum } = require('../../utils/enums');
 
 const router = express.Router();
 router.use('/users', user);
-router.use('/accounts', authenticateJWT([userRolesEnum.ADMIN]), account);
-router.use('/transactions', authenticateJWT([userRolesEnum.ADMIN]), transaction);
-router.use('/credit-cards', authenticateJWT([userRolesEnum.ADMIN]), creditCard);
+router.use('/accounts', account);
+router.use('/transactions', transaction);
+router.use('/credit-cards', creditCard);
 // __ROUTE__
 
 module.exports = router;
