@@ -28,7 +28,7 @@ const main = async () => {
 
   for (let index = 0; index < 1000; index++) {
     accounts.push({
-      owner: users[Math.floor(Math.random() * users.length)],
+      userId: users[Math.floor(Math.random() * users.length)],
       type: Object
         .values(accountTypesEnum)[Math.floor(Math.random() * Object
           .values(accountTypesEnum).length)],
@@ -41,11 +41,13 @@ const main = async () => {
   console.log('Bank accounts created');
 
   for (let index = 0; index < 1500; index++) {
+    const account = accounts[Math.floor(Math.random() * accounts.length)];
     creditCards.push({
       number: faker.finance.creditCardNumber(),
       expirationDate: faker.date.future(),
       securityCode: faker.finance.creditCardCVV(),
-      account: accounts[Math.floor(Math.random() * accounts.length)],
+      accountId: account._id,
+      userId: account.userId,
       allowedLimit: Math.floor(100000 * Math.random()),
       limitUsage: Math.floor(100000 * Math.random()),
       isActive: Math.random() < 0.5,

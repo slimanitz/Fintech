@@ -6,7 +6,7 @@ const APIError = require('../../utils/api-error');
 const { accountTypesEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
-  owner: Joi.string().required(),
+  userId: Joi.string().required(),
   iban: Joi.string(),
   type: Joi.string().valid(...Object.values(accountTypesEnum)),
   balance: Joi.number(),
@@ -15,7 +15,7 @@ const schema = Joi.object({
 });
 
 const updateSchema = Joi.object({
-  owner: Joi.string(),
+  userId: Joi.string(),
   iban: Joi.string(),
   type: Joi.string().valid(...Object.values(accountTypesEnum)),
   balance: Joi.number(),
@@ -61,28 +61,28 @@ const remove = async (id) => {
   await Account.findByIdAndDelete(id);
 };
 
-const createUserAccount = async (userId, payload) => {
+const createUserAccount = async ({ userId }, payload) => {
   if (!ObjectId.isValid(userId)) {
     throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   }
-  let account = { ...payload, owner: userId };
+  let account = { ...payload, userId };
   account = await create(account);
   return account;
 };
 
-const getAllUserAccounts = async (id) => {
-  if (!ObjectId.isValid(id)) {
+const getAllUserAccounts = async ({ userId }) => {
+  if (!ObjectId.isValid(userId)) {
     throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
   }
-  const accounts = await getAll({ owner: id });
+  const accounts = await getAll({ userId });
   return accounts;
 };
 
-const getUserAccount = async (userId, accountId) => {
+const getUserAccount = async ({ userId, accountId }) => {
   if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
     throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
   }
-  const accounts = await Account.findOne({ owner: userId, _id: accountId });
+  const accounts = await Account.findOne({ userId, _id: accountId });
   return accounts;
 };
 
@@ -91,10 +91,9 @@ const updateUserAccount = async ({ userId, accountId }, payload) => {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
   const { error, value } = updateSchema.validate(payload);
-  console.log(error);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await Account
-    .findOneAndUpdate({ _id: accountId, owner: userId }, { $set: value }, { new: true });
+    .findOneAndUpdate({ _id: accountId, userId }, { $set: value }, { new: true });
   if (!updatedValue) throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
   return updatedValue;
 };
