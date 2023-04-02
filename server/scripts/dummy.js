@@ -14,6 +14,13 @@ const main = async () => {
   let accounts = [];
   let creditCards = [];
 
+  users.push({
+    email: 'slimaneber@gmail.com',
+    password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
+    name: 'Slimane',
+    role: 'CLIENT',
+  });
+
   for (let index = 0; index < 100; index++) {
     users.push({
       name: faker.name.fullName(),
@@ -32,7 +39,7 @@ const main = async () => {
       type: Object
         .values(accountTypesEnum)[Math.floor(Math.random() * Object
           .values(accountTypesEnum).length)],
-      balance: (300000 * Math.random()).toFixed(2),
+      balance: faker.finance.amount(0, 30000),
       isActive: Math.random() < 0.5,
       iban: faker.finance.iban(),
     });
@@ -43,13 +50,13 @@ const main = async () => {
   for (let index = 0; index < 1500; index++) {
     const account = accounts[Math.floor(Math.random() * accounts.length)];
     creditCards.push({
-      number: faker.finance.creditCardNumber(),
+      number: faker.finance.creditCardNumber().replaceAll('-', ''),
       expirationDate: faker.date.future(),
       securityCode: faker.finance.creditCardCVV(),
       accountId: account._id,
       userId: account.userId,
-      allowedLimit: Math.floor(100000 * Math.random()),
-      limitUsage: Math.floor(100000 * Math.random()),
+      allowedLimit: faker.finance.amount(8000, 10000),
+      limitUsage: faker.finance.amount(0, 8000),
       isActive: Math.random() < 0.5,
     });
   }
