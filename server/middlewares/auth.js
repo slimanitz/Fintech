@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
+const httpStatus = require('http-status');
 const User = require('../api/models/user');
 const { jwtSecret } = require('../config/vars');
 const APIError = require('../utils/api-error');
@@ -17,7 +18,7 @@ const authenticateJWT = (roles) => (req, res, next) => {
       // eslint-disable-next-line consistent-return
       jwt.verify(token, jwtSecret, async (err, payload) => {
         if (err || !payload) {
-          return res.sendStatus(403);
+          return res.sendStatus(httpStatus.FORBIDDEN);
         }
         const { user } = payload;
         const dbUser = await User.findById(user._id);
@@ -26,10 +27,10 @@ const authenticateJWT = (roles) => (req, res, next) => {
           req.user = dbUser;
           return next();
         }
-        res.sendStatus(401);
+        res.sendStatus(httpStatus.UNAUTHORIZED);
       });
     } else {
-      res.sendStatus(401);
+      res.sendStatus(httpStatus.UNAUTHORIZED);
     }
   } catch (e) {
     throw new APIError({ message: 'Error caught on the Auth midleware' });
