@@ -18,7 +18,7 @@ const authenticateJWT = (roles) => (req, res, next) => {
       // eslint-disable-next-line consistent-return
       jwt.verify(token, jwtSecret, async (err, payload) => {
         if (err || !payload) {
-          return res.sendStatus(httpStatus.FORBIDDEN);
+          return res.sendStatus(httpStatus.UNAUTHORIZED);
         }
         const { user } = payload;
         const dbUser = await User.findById(user._id);
