@@ -13,9 +13,10 @@ const creditCardSchema = new mongoose.Schema(
     },
     isActive: { type: Boolean, default: true },
     securityCode: { type: String },
-    account: { type: mongoose.Types.ObjectId },
+    accountId: { type: mongoose.Types.ObjectId },
     allowedLimit: { type: Number },
     limitUsage: { type: Number, default: 0 },
+    userId: { type: mongoose.Types.ObjectId },
 
   },
   { timestamps: true },

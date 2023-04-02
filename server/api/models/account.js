@@ -6,7 +6,7 @@ const { accountTypesEnum } = require('../../utils/enums');
 
 const accountSchema = new mongoose.Schema(
   {
-    owner: { type: mongoose.Types.ObjectId },
+    userId: { type: mongoose.Types.ObjectId },
     iban: { type: String, default: faker.finance.iban() },
     type: { type: String, enum: Object.values(accountTypesEnum), default: accountTypesEnum.BASIC },
     balance: { type: Number, default: 0 },
