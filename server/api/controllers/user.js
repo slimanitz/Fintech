@@ -58,20 +58,20 @@ const updateUserAccount = async (req, res) => {
 
 // Credit Card
 
-const createUserAccountCreditCard = async (req, res) => {
+const createUserCreditCard = async (req, res) => {
   const creditCard = await creditCardService.createUserAccountCreditCard(req.params);
   res.status(httpStatus.OK).json(creditCard);
 };
-const getAllUserAccountCreditCards = async (req, res) => {
-  const creditCards = await creditCardService.getAllUserAccountsCreditCards(req.params, req.body);
+const getAllUserCreditCards = async (req, res) => {
+  const creditCards = await creditCardService.getAllUsersCreditCards(req.params, req.body);
   res.status(httpStatus.OK).json(creditCards);
 };
-const getUserAccountCreditCard = async (req, res) => {
-  const creditCard = await creditCardService.getUserAccountCreditCard(req.params);
+const getUserCreditCard = async (req, res) => {
+  const creditCard = await creditCardService.getUserCreditCard(req.params);
   res.status(httpStatus.OK).json(creditCard);
 };
-const updateUserAccountCreditCard = async (req, res) => {
-  const creditCard = await creditCardService.updateUserAccountCreditCard(req.params, req.body);
+const updateUserCreditCard = async (req, res) => {
+  const creditCard = await creditCardService.updateUserCreditCard(req.params, req.body);
   res.status(httpStatus.OK).json(creditCard);
 };
 
@@ -102,10 +102,10 @@ module.exports = {
   getAllUserAccounts,
   getUserAccount,
   updateUserAccount,
-  createUserAccountCreditCard,
-  getAllUserAccountCreditCards,
-  getUserAccountCreditCard,
-  updateUserAccountCreditCard,
+  createUserCreditCard,
+  getAllUserCreditCards,
+  getUserCreditCard,
+  updateUserCreditCard,
   createUserTransaction,
   getAllUserTransactions,
   getUserTransaction,
