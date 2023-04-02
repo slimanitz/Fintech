@@ -5,7 +5,7 @@ const mongoClient = require('../../config/database');
 
 const creditCardSchema = new mongoose.Schema(
   {
-    number: { type: String, default: (faker.finance.creditCardNumber()).replaceAll('-', '') },
+    number: { type: String, unique: true },
     expirationDate: {
       type: Date,
       default: new Date(new Date()
@@ -14,10 +14,10 @@ const creditCardSchema = new mongoose.Schema(
     },
     isActive: { type: Boolean, default: true },
     securityCode: { type: String, default: faker.finance.creditCardCVV() },
-    accountId: { type: mongoose.Types.ObjectId },
+    accountId: { type: mongoose.Types.ObjectId, required: true },
     allowedLimit: { type: Number, default: faker.finance.amount(8000, 10000) },
     limitUsage: { type: Number, default: 0 },
-    userId: { type: mongoose.Types.ObjectId },
+    userId: { type: mongoose.Types.ObjectId, required: true },
 
   },
   { timestamps: true },
