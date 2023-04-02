@@ -14,7 +14,7 @@ const checkUserAsset = async (req, res, next) => {
     userId, accountId, creditCardId, transactionId,
   } = req.params;
 
-  const userAccounts = (creditCardId) && await Account.find({ userId });
+  const userAccounts = (accountId) && await Account.find({ userId });
   const creditCards = (creditCardId) && await CreditCard.find({ userId });
   const transactions = (transactionId) && await Transaction.find({ userId });
 
