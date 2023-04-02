@@ -1,9 +1,10 @@
 const httpStatus = require('http-status');
 const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
+const { faker } = require('@faker-js/faker');
 const Account = require('../models/account');
 const APIError = require('../../utils/api-error');
-const { accountTypesEnum } = require('../../utils/enums');
+const { accountTypesEnum, ibanToCurrencies } = require('../../utils/enums');
 
 const schema = Joi.object({
   userId: Joi.string().required(),
@@ -11,6 +12,7 @@ const schema = Joi.object({
   type: Joi.string().valid(...Object.values(accountTypesEnum)),
   balance: Joi.number(),
   isActive: Joi.boolean(),
+  currency: Joi.string().required(),
 
 });
 
@@ -66,6 +68,8 @@ const createUserAccount = async ({ userId }, payload) => {
     throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   }
   let account = { ...payload, userId };
+  account.iban = faker.finance.iban();
+  account.currency = ibanToCurrencies[account.iban.substring(0, 2)];
   account = await create(account);
   return account;
 };
