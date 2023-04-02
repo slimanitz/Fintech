@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema(
   {
     creditAccount: { type: mongoose.Types.ObjectId, required: true, ref: 'account' },
     debitAccount: { type: mongoose.Types.ObjectId, ref: 'account' },
-    userId: { type: mongoose.Types.ObjectId, ref: 'user' },
+    userId: { type: mongoose.Types.ObjectId, ref: 'user', required: true },
     ammount: { type: Number, required: true },
     status: {
       type: String,
