@@ -14,14 +14,9 @@ describe('Check before launching tests', () => {
   });
 
   test('Should make sure that we are using the test env variables ', async () => {
-    console.log('====================================');
-    console.log(mongoUrl);
-    console.log(host);
-    console.log(jwtSecret);
-    await mongoose.connection.db.dropDatabase(() => console.log('Database dropped succesfully'));
-    console.log('====================================');
+    if (process.env.APP_ENV === 'test') { await mongoose.connection.db.dropDatabase(() => console.log('Database dropped succesfully')); }
     expect(process.env.APP_ENV).toEqual('test');
-  });
+  }, 10000);
 });
 
 describe('Testing Client API Endpoints', () => {
@@ -36,6 +31,7 @@ describe('Testing Client API Endpoints', () => {
 
   afterAll(() => {
     server.close();
+    mongoose.connection.close();
   });
 
   const user = {
@@ -189,6 +185,45 @@ describe('Testing Client API Endpoints', () => {
     });
   });
 
+  describe('GET /api/users/:userId/credit-cards', () => {
+    test('should return All users creditCards  ', async () => {
+      const res = await request(app).get(`/api/users/${user._id}/credit-cards`).set('Authorization', token);
+      expect(res.status).toEqual(200);
+      expect(res.body).toContainEqual(creditCard);
+    });
+
+    describe('Authentication check on GET /api/users/:userId/credit-cards', () => {
+      test('should return FORBIDDEN', async () => {
+        const res = await request(app).get(`/api/users/${user._id}/credit-cards`);
+        expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
+      });
+    });
+  });
+
+  describe('PATCH /api/users/:userId/credit-cards/:creditCardId', () => {
+    test('should return update a creditCard', async () => {
+      const updatedValues = { isActive: false, allowedLimit: 20000 };
+      const res = await request(app).patch(`/api/users/${user._id}/credit-cards/${creditCard._id}`).set('Authorization', token).send(updatedValues);
+      expect(res.status).toEqual(200);
+      expect(res.body.isActive).toEqual(updatedValues.isActive);
+      expect(res.body.allowedLimit).toEqual(updatedValues.allowedLimit);
+    });
+
+    describe('Authentication check on PATCH /api/users/:userId/credit-cards', () => {
+      test('should return FORBIDDEN', async () => {
+        const res = await request(app).patch(`/api/users/${user._id}/credit-cards/${creditCard._id}`);
+        expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('Allowed fields check on PATCH /api/users/:userId/credit-cards', () => {
+      test('should return BAD_REQUEST', async () => {
+        const updatedValues = { isActive: false, securityCode: '213' };
+        const res = await request(app).patch(`/api/users/${user._id}/credit-cards/${creditCard._id}`).set('Authorization', token).send(updatedValues);
+        expect(res.status).toEqual(httpStatus.BAD_REQUEST);
+      });
+    });
+  });
   // describe('GET /api/users/:userId/accounts', () => {
   //   test('should return all user accounts', async () => {
   //     const res = await request(app).get(`/api/users/${user._id}/accounts`).set('Authorization', token);
