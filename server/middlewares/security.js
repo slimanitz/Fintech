@@ -13,14 +13,13 @@ const checkUserAsset = async (req, res, next) => {
   const {
     userId, accountId, creditCardId, transactionId,
   } = req.params;
+  console.log('====================================');
+  console.log('HERE');
+  console.log('====================================');
 
-  const userAccounts = (accountId) && await Account.find({ userId });
-  const creditCards = (creditCardId) && await CreditCard.find({ userId });
-  const transactions = (transactionId) && await Transaction.find({ userId });
-
-  if (!userAccounts.find((e) => e._id.equals(accountId))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
-  if (!creditCards.find((e) => e._id.equals(creditCardId))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
-  if (!transactions.find((e) => e._id.equals(transactionId))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
+  if (accountId && !(await Account.find({ userId }))) { throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT }); }
+  if (creditCardId && !(await CreditCard.find({ userId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
+  if (transactionId && !(await Transaction.find({ userId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
 
   return next();
 };
