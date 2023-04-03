@@ -24,6 +24,7 @@ jobs:
         node-version: '16.10.0'
         registry-url: 'https://registry.yarnpkg.com'
         cache: 'yarn'
+        cache-dependency-path: ./server/yarn.lock
     - name: Install dependencies
       run: yarn --cwd ./server/ install
     - name: Test
