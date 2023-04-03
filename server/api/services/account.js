@@ -17,10 +17,6 @@ const schema = Joi.object({
 });
 
 const updateSchema = Joi.object({
-  userId: Joi.string(),
-  iban: Joi.string(),
-  type: Joi.string().valid(...Object.values(accountTypesEnum)),
-  balance: Joi.number(),
   isActive: Joi.boolean(),
 
 });
@@ -93,7 +89,7 @@ const getUserAccount = async ({ userId, accountId }) => {
   return accounts;
 };
 
-const updateUserAccountCreditCard = async ({ userId, accountId }, payload) => {
+const updateUserAccount = async ({ userId, accountId }, payload) => {
   if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
@@ -114,5 +110,5 @@ module.exports.accountService = {
   createUserAccount,
   getAllUserAccounts,
   getUserAccount,
-  updateUserAccountCreditCard,
+  updateUserAccount,
 };
