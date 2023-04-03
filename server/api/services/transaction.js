@@ -71,10 +71,11 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
   let transaction = { ...payload, userId, debitAccount: accountId };
   const { error } = createUserTransactionSchema.validate(transaction);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const account = await Account.findOne({ iban: transaction.creditAccountIban });
-  if (!account) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
+  const creditAccount = await Account.findOne({ iban: transaction.creditAccountIban });
+  if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
+  if (creditAccount._id.equals(accountId)) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
   if (transaction.gateway === transactionGatewayEnum.TRANSFER) transaction.gatewayId = accountId;
-  transaction = { ...transaction, creditAccount: account._id.toString() };
+  transaction = { ...transaction, creditAccount: creditAccount._id.toString() };
   delete transaction.creditAccountIban;
 
   transaction = await create(transaction);

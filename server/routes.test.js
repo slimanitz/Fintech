@@ -262,22 +262,44 @@ describe('Testing Client API Endpoints', () => {
         expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
       });
     });
+
+    describe('Check the fact that we can t use the same account', () => {
+      test('should return CONFLICT', async () => {
+        const payload = {
+          ammount: 2000,
+          gateway: transactionGatewayEnum.TRANSFER,
+          creditAccountIban: account.iban,
+          comment: 'Test transaction ',
+        };
+
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+        expect(res.status).toEqual(httpStatus.CONFLICT);
+      });
+    });
   });
 
-  // describe('GET /api/users/:userId/transactions/:transactionId', () => {
-  //   test('should return All users creditCards  ', async () => {
-  //     const res = await request(app).get('/api/users/:userId/transactions/:transactionId').set('Authorization', token);
-  //     expect(res.status).toEqual(200);
-  //     expect(res.body).toContainEqual(creditCard);
-  //   });
+  describe('GET /api/users/:userId/transactions', () => {
+    test('should return All users transactions  ', async () => {
+      const res = await request(app).get(`/api/users/${user._id}/transactions`).set('Authorization', token);
+      expect(res.status).toEqual(200);
+      expect(res.body).toContainEqual(transaction);
+    });
+  });
 
-  //   describe('Authentication check on GET /api/users/:userId/transactions/:transactionId', () => {
-  //     test('should return FORBIDDEN', async () => {
-  //       const res = await request(app).get('/api/users/:userId/transactions/:transactionId');
-  //       expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-  //     });
-  //   });
-  // });
+  describe('GET /api/users/:userId/transactions/:transactionId', () => {
+    test('should return  users transactions by ID  ', async () => {
+      const res = await request(app).get(`/api/users/${user._id}/transactions/${transaction._id}`).set('Authorization', token);
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual(transaction);
+    });
+
+    describe('Authentication check on GET /api/users/:userId/transactions/:transactionId', () => {
+      test('should return FORBIDDEN', async () => {
+        const res = await request(app).get('/api/users/:userId/transactions/:transactionId');
+        expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
+      });
+    });
+  });
 
   // describe('GET /api/users/:userId/credit-cards/:creditCardId', () => {
   //   test('should return All users creditCards  ', async () => {
