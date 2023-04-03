@@ -11,8 +11,8 @@ const {
   getUserTransaction,
 } = require('../controllers/user');
 const { userRolesEnum } = require('../../utils/enums');
-const authenticateJWT = require('../../middlewares/auth');
-const checkUserAsset = require('../../middlewares/security');
+const JWTCheck = require('../../middlewares/jwt-check');
+const coherenceCheck = require('../../middlewares/coherence-check');
 
 const router = express.Router();
 
@@ -25,20 +25,20 @@ router.patch('/:id', update);
 router.delete('/:id', remove);
 
 // Accounts
-router.post('/:userId/accounts', authenticateJWT([userRolesEnum.CLIENT]), createUserAccount);
-router.get('/:userId/accounts', authenticateJWT([userRolesEnum.CLIENT]), getAllUserAccounts);
-router.get('/:userId/accounts/:accountId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, getUserAccount);
-router.patch('/:userId/accounts/:accountId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, updateUserAccount);
+router.post('/:userId/accounts', JWTCheck([userRolesEnum.CLIENT]), createUserAccount);
+router.get('/:userId/accounts', JWTCheck([userRolesEnum.CLIENT]), getAllUserAccounts);
+router.get('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, getUserAccount);
+router.patch('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, updateUserAccount);
 
 // Credit cards
-router.post('/:userId/accounts/:accountId/credit-cards', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, createUserCreditCard);
-router.get('/:userId/credit-cards', authenticateJWT([userRolesEnum.CLIENT]), getAllUserCreditCards);
-router.get('/:userId/credit-cards/:creditCardId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, getUserCreditCard);
-router.patch('/:userId/credit-cards/:creditCardId', authenticateJWT([userRolesEnum.CLIENT]), checkUserAsset, updateUserCreditCard);
+router.post('/:userId/accounts/:accountId/credit-cards', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, createUserCreditCard);
+router.get('/:userId/credit-cards', JWTCheck([userRolesEnum.CLIENT]), getAllUserCreditCards);
+router.get('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, getUserCreditCard);
+router.patch('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, updateUserCreditCard);
 
 // Transactions
-router.post('/:userId/accounts/:accountId/transactions', authenticateJWT([userRolesEnum.CLIENT]), createUserTransaction);
-router.get('/:userId/transactions', authenticateJWT([userRolesEnum.CLIENT]), getAllUserTransactions);
-router.get('/:userId/transactions/:transactionId', authenticateJWT([userRolesEnum.CLIENT]), getUserTransaction);
+router.post('/:userId/accounts/:accountId/transactions', JWTCheck([userRolesEnum.CLIENT]), createUserTransaction);
+router.get('/:userId/transactions', JWTCheck([userRolesEnum.CLIENT]), getAllUserTransactions);
+router.get('/:userId/transactions/:transactionId', JWTCheck([userRolesEnum.CLIENT]), getUserTransaction);
 
 module.exports = router;

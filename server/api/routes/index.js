@@ -3,7 +3,6 @@ const user = require('./user');
 const account = require('./account');
 const transaction = require('./transaction');
 const creditCard = require('./creditCard');
-const authenticateJWT = require('../../middlewares/auth');
 const { userRolesEnum } = require('../../utils/enums');
 // __IMPORT__
 

@@ -9,7 +9,7 @@ const APIError = require('../utils/api-error');
 // I made a specific login in this middleware where I've make a verification
 // if the user is using a good Agency ID and Iam checking as well on the database if it's coherent
 
-const authenticateJWT = (roles) => (req, res, next) => {
+const JWTCheck = (roles) => (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -37,4 +37,4 @@ const authenticateJWT = (roles) => (req, res, next) => {
   }
 };
 
-module.exports = authenticateJWT;
+module.exports = JWTCheck;
