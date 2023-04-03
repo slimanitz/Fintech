@@ -16,6 +16,12 @@ const schema = Joi.object({
   role: Joi.string().valid(...Object.values(userRolesEnum)),
 });
 
+const updateSchema = Joi.object({
+  name: Joi.string(),
+  email: Joi.string(),
+  password: Joi.string(),
+});
+
 const create = async (user) => {
   const { error, value } = schema.validate(user);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
@@ -51,9 +57,11 @@ const update = async (id, payload) => {
   if (!ObjectId.isValid(id)) {
     throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   }
-  const { error, value } = schema.validate(payload);
+  console.log('HERE');
+  const { error, value } = updateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const updatedValue = await User.findByIdAndUpdate(id, value);
+  const updatedValue = await User.findOneAndUpdate({ _id: id }, { $set: value }, { new: true });
+
   if (!updatedValue) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   return updatedValue;
 };
