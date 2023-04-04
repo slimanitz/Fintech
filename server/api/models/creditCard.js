@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line no-unused-vars
-const { faker } = require('@faker-js/faker');
 const mongoClient = require('../../config/database');
 
 const creditCardSchema = new mongoose.Schema(
