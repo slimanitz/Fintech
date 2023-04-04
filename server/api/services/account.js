@@ -72,7 +72,7 @@ const createUserAccount = async ({ userId }, payload) => {
   let account = { ...payload, userId, type: payload.type || accountTypesEnum.BASIC };
   account.iban = faker.finance.iban();
   account.currency = ibanToCurrencies[account.iban.substring(0, 2)];
-  account = await create(account);
+  account = await Account.create(account);
   return account;
 };
 
