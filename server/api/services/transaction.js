@@ -3,7 +3,7 @@ const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
-const { transactionGatewayEnum, transactionStatusEnum } = require('../../utils/enums');
+const { transactionGatewayEnum, transactionStatusEnum, accountTypesEnum } = require('../../utils/enums');
 const Account = require('../models/account');
 
 const insertionSchema = Joi.object({
@@ -71,9 +71,12 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
   let transaction = { ...payload, userId, debitAccount: accountId };
   const { error } = createUserTransactionSchema.validate(transaction);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  const debitAccount = await Account.findOne({ userId, _id: accountId });
+  if (!debitAccount) throw new APIError({ message: `Account with the following ID is not found ${transaction.debitAccount}`, status: httpStatus.CONFLICT });
   const creditAccount = await Account.findOne({ iban: transaction.creditAccountIban });
   if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
-  if (creditAccount._id.equals(accountId)) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
+  if (creditAccount._id.equals(accountId)) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
+  if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (!debitAccount.userId.equals(accountId) || !creditAccount.userId.equals(accountId))) throw new APIError({ message: 'Cannot send money to someone else\'s saving account', status: httpStatus.CONFLICT });
   if (transaction.gateway === transactionGatewayEnum.TRANSFER) transaction.gatewayId = accountId;
   transaction = { ...transaction, creditAccount: creditAccount._id.toString() };
   delete transaction.creditAccountIban;

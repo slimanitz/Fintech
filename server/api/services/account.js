@@ -16,7 +16,11 @@ const schema = Joi.object({
 
 });
 
-const updateSchema = Joi.object({
+const userCreateSchema = Joi.object({
+  type: Joi.string().valid(...Object.values(accountTypesEnum)),
+});
+
+const userUpdateSchema = Joi.object({
   isActive: Joi.boolean(),
 
 });
@@ -39,9 +43,6 @@ const get = async (id) => {
 };
 
 const getAll = async (filters) => {
-  console.log('====================================');
-  console.log('test');
-  console.log('====================================');
   const accounts = await Account.find({ ...filters });
   return accounts;
 };
@@ -66,7 +67,9 @@ const createUserAccount = async ({ userId }, payload) => {
   if (!ObjectId.isValid(userId)) {
     throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   }
-  let account = { ...payload, userId };
+  const { error } = userCreateSchema.validate(payload);
+  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  let account = { ...payload, userId, type: payload.type || accountTypesEnum.BASIC };
   account.iban = faker.finance.iban();
   account.currency = ibanToCurrencies[account.iban.substring(0, 2)];
   account = await create(account);
@@ -93,7 +96,7 @@ const updateUserAccount = async ({ userId, accountId }, payload) => {
   if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
     throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
   }
-  const { error, value } = updateSchema.validate(payload);
+  const { error, value } = userUpdateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await Account
     .findOneAndUpdate({ _id: accountId, userId }, { $set: value }, { new: true });

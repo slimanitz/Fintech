@@ -4,8 +4,7 @@ const { default: mongoose } = require('mongoose');
 const httpStatus = require('http-status');
 const app = require('./config/server');
 const connect = require('./config/database');
-const { mongoUrl, host, jwtSecret } = require('./config/vars');
-const { transactionGatewayEnum } = require('./utils/enums');
+const { transactionGatewayEnum, accountTypesEnum } = require('./utils/enums');
 
 let token = 'Bearer ';
 
@@ -101,7 +100,7 @@ describe('Testing Client API Endpoints', () => {
 
   describe('POST /api/users/:userId/accounts', () => {
     test('should create an account ', async () => {
-      const res = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token).send({ userId: user._id });
+      const res = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
       account = res.body;
       expect(res.status).toEqual(200);
       expect(res.body.balance).toEqual(0);
@@ -238,14 +237,14 @@ describe('Testing Client API Endpoints', () => {
 
   describe('POST /api/users/:userId/accounts/:accountId/transactions', () => {
     test('should create a transaction ', async () => {
-      const accountResponse = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token);
+      const accountResponse = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
       const creditAccount = accountResponse.body;
 
       const payload = {
         ammount: 2000,
         gateway: transactionGatewayEnum.TRANSFER,
         creditAccountIban: creditAccount.iban,
-        comment: 'Test transaction ',
+        comment: 'Test transaction',
       };
 
       const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
@@ -269,6 +268,24 @@ describe('Testing Client API Endpoints', () => {
           ammount: 2000,
           gateway: transactionGatewayEnum.TRANSFER,
           creditAccountIban: account.iban,
+          comment: 'Test transaction ',
+        };
+
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+        expect(res.status).toEqual(httpStatus.CONFLICT);
+      });
+    });
+
+    describe('Check the fact that we can t make a transaction between someone else s saving account', () => {
+      test('should return CONFLICT', async () => {
+        const userResponse = await request(app).post('/api/users').send({ email: 'example@gmail.com', password: 'password', name: 'example' });
+        const accountResponse = await request(app).post(`/api/users/${userResponse.body._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.SAVING });
+        const creditAccount = accountResponse.body;
+
+        const payload = {
+          ammount: 2000,
+          gateway: transactionGatewayEnum.TRANSFER,
+          creditAccountIban: creditAccount.iban,
           comment: 'Test transaction ',
         };
 
