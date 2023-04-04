@@ -5,11 +5,12 @@ const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
 const { transactionGatewayEnum, transactionStatusEnum, accountTypesEnum } = require('../../utils/enums');
 const Account = require('../models/account');
+const CreditCard = require('../models/creditCard');
 
 const insertionSchema = Joi.object({
   creditAccount: Joi.string().required(),
   debitAccount: Joi.string(),
-  ammount: Joi.number().required(),
+  amount: Joi.number().required(),
   status: Joi.boolean().valid(...Object.values(transactionStatusEnum)),
   gateway: Joi.string().valid(...Object.values(transactionGatewayEnum)).required(),
   gatewayId: Joi.string(),
@@ -19,14 +20,22 @@ const insertionSchema = Joi.object({
 });
 
 const createUserTransactionSchema = Joi.object({
-  debitAccount: Joi.string().required(),
-  ammount: Joi.number().required(),
-  gateway: Joi.string()
-    .valid(...[transactionGatewayEnum.CREDIT_CARD, transactionGatewayEnum.TRANSFER]).required(),
-  gatewayId: Joi.alternatives().conditional('gateway', { is: transactionGatewayEnum.TRANSFER, then: Joi.string(), otherwise: Joi.string().required() }),
+  amount: Joi.number().required(),
+  gateway: Joi.string().valid(...Object.values(transactionGatewayEnum)).required(),
+  debitAccount: Joi.alternatives().conditional('gateway', { is: transactionGatewayEnum.DEPOSIT, then: Joi.array(), otherwise: Joi.string().required() }),
+  gatewayId: Joi.alternatives().conditional('gateway', {
+    is: Joi.string()
+      .valid(...[transactionGatewayEnum.CREDIT_CARD,
+        transactionGatewayEnum.DEPOSIT, transactionGatewayEnum.TRANSFER])
+      .required(),
+    then: Joi.any(),
+    otherwise: Joi.string().required(),
+  }),
   creditAccountIban: Joi.string().required(),
   comment: Joi.string(),
   userId: Joi.string().required(),
+  creditCardInfo: Joi.alternatives().conditional('gateway', { is: transactionGatewayEnum.CREDIT_CARD, then: Joi.object({ number: Joi.string().required(), expirationDate: Joi.date().required(), securityCode: Joi.string().required() }), otherwise: Joi.any() }),
+
 });
 
 const create = async (transaction) => {
@@ -78,8 +87,17 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
   if (creditAccount._id.equals(accountId)) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
   if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (!debitAccount.userId.equals(accountId) || !creditAccount.userId.equals(accountId))) throw new APIError({ message: 'Cannot send money to someone else\'s saving account', status: httpStatus.CONFLICT });
   if (transaction.gateway === transactionGatewayEnum.TRANSFER) transaction.gatewayId = accountId;
+  if (transaction.gateway === transactionGatewayEnum.CREDIT_CARD) {
+    const creditCard = await CreditCard.findOne({ ...transaction.creditCardInfo });
+    if (!creditCard) throw new APIError({ message: 'Credit card not found', status: httpStatus.NOT_FOUND });
+    if (creditCard.isActive) throw new APIError({ message: 'Credit card  not active', status: httpStatus.CONFLICT });
+    if (((creditCard.allowedLimit - creditAccount.limitUsage) < transaction.amount)) { throw new APIError({ message: 'Reaching credit card limit', status: httpStatus.CONFLICT }); }
+    if (creditCard.expirationDate < Date.now()) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
+    transaction.gatewayId = creditCard._id.toString();
+  }
   transaction = { ...transaction, creditAccount: creditAccount._id.toString() };
   delete transaction.creditAccountIban;
+  delete transaction.creditCardInfo;
 
   transaction = await create(transaction);
   return transaction;
