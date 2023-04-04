@@ -4,6 +4,8 @@ const Joi = require('joi');
 const { faker } = require('@faker-js/faker');
 const CreditCard = require('../models/creditCard');
 const APIError = require('../../utils/api-error');
+const Account = require('../models/account');
+const { accountTypesEnum } = require('../../utils/enums');
 
 const schema = Joi.object({
   number: Joi.string().required(),
@@ -70,8 +72,15 @@ const createUserAccountCreditCard = async ({ userId, accountId }) => {
   }
   const { error, value } = userCreationSchema.validate({ userId, accountId });
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+
+  const account = await Account.findOne({ userId, _id: accountId });
+  if (!account) throw new APIError({ message: `Account with given id ${accountId} IS NOT FOUND !`, status: httpStatus.NOT_FOUND });
+  if (account.type === accountTypesEnum.SAVING) throw new APIError({ message: 'Cannot create credit card for saving account', status: httpStatus.CONFLICT });
   value.number = faker.finance.creditCardNumber().replaceAll('-', '');
-  const creditCard = await CreditCard.create(value);
+  value.securityCode = faker.finance.creditCardCVV();
+  value.expirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
+  value.allowedLimit = faker.finance.amount(8000, 10000);
+  const creditCard = await create(value);
   return creditCard;
 };
 
