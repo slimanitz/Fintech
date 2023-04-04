@@ -34,7 +34,7 @@ const simulation = async ({ email, password }, accounts) => {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
-        ammount: 2000,
+        amount: 2000,
         gateway: transactionGatewayEnum.TRANSFER,
         creditAccountIban: creditAcccount._doc.iban,
         comment: 'Test transaction ',
