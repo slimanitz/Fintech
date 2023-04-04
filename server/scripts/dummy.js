@@ -21,10 +21,10 @@ const main = async () => {
     role: 'CLIENT',
   });
 
-  for (let index = 0; index < 100; index++) {
+  for (let index = 0; index < 10000; index++) {
     users.push({
       name: faker.name.fullName(),
-      email: faker.internet.email(),
+      email: index + faker.internet.email(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
       role: Object
         .values(userRolesEnum)[Math.floor(Math.random() * Object.values(userRolesEnum).length)],
@@ -42,6 +42,7 @@ const main = async () => {
       balance: faker.finance.amount(0, 30000),
       isActive: Math.random() < 0.5,
       iban: faker.finance.iban(),
+      currency: 'EUR',
     });
   }
   accounts = await Account.insertMany(accounts);
