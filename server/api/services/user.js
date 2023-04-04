@@ -36,7 +36,8 @@ const login = async ({ email, password }) => {
   const user = await User.findOne({ email, password: hashpassword, isActive: true });
   if (!user) throw new APIError({ message: 'Wrong credentials', status: httpStatus.UNAUTHORIZED });
   const token = jwt.sign({ user }, jwtSecret, { expiresIn: '2h' });
-  return token;
+  delete user.password;
+  return { ...user, token };
 };
 
 const get = async (id) => {
