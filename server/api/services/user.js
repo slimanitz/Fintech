@@ -7,6 +7,7 @@ const User = require('../models/user');
 const APIError = require('../../utils/api-error');
 const { jwtSecret } = require('../../config/vars');
 const { userRolesEnum } = require('../../utils/enums');
+const { redisClient } = require('../../config/cache');
 
 const schema = Joi.object({
   name: Joi.string().required(),
@@ -28,6 +29,7 @@ const create = async (user) => {
   value.password = crypto.createHash('sha1').update(value.password, 'binary').digest('hex');
   const newUser = new User(value);
   await newUser.save();
+  await redisClient.del('users');
   return newUser;
 };
 
@@ -50,7 +52,11 @@ const get = async (id) => {
 };
 
 const getAll = async (filters) => {
-  const users = await User.find({ ...filters });
+  let users = await redisClient.getList('users');
+  if (users.length === 0) {
+    users = await User.find({ ...filters });
+    await redisClient.setList('users', users);
+  }
   return users;
 };
 
