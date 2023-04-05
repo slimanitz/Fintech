@@ -6,4 +6,7 @@ module.exports = {
   mongoUrl: env.MONGO_URL,
   jwtSecret: env.JWT_SECRET,
   host: env.HOST,
+  redisHost: env.REDIS_HOST,
+  redisPassword: env.REDIS_PASSWORD,
+  redisPort: +env.REDIS_PORT,
 };

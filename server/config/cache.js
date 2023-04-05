@@ -1,6 +1,13 @@
 const Redis = require('ioredis');
+const { redisPassword, redisHost, redisPort } = require('./vars');
 
 const redisClient = new Redis({
+  username: 'default',
+  password: redisPassword,
+  socket: {
+    host: redisHost,
+    port: redisPort,
+  },
   commandTimeout: 5000,
   retryStrategy: () => 5000,
 });
