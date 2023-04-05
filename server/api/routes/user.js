@@ -18,7 +18,7 @@ const router = express.Router();
 
 // USERS
 router.post('/', create);
-router.get('/:id', get);
+// router.get('/:id', get);
 router.post('/login', login);
 router.get('/', getAll);
 router.patch('/:id', update);
