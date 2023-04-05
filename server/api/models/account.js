@@ -17,6 +17,7 @@ const accountSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
+accountSchema.set('lean', true);
 const Account = mongoose.model('account', accountSchema);
 
 module.exports = Account;

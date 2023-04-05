@@ -24,6 +24,7 @@ const transactionSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
+transactionSchema.set('lean', true);
 const Transaction = mongoose.model('transaction', transactionSchema);
 
 module.exports = Transaction;

@@ -12,10 +12,12 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: Object.values(userRolesEnum), default: userRolesEnum.CLIENT },
 
   },
+
   { timestamps: true },
   { versionKey: false },
 );
 
+userSchema.set('lean', true);
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;

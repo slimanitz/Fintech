@@ -18,6 +18,7 @@ const creditCardSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
+creditCardSchema.set('lean', true);
 const CreditCard = mongoose.model('creditCard', creditCardSchema);
 
 module.exports = CreditCard;
