@@ -93,9 +93,6 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
       if (((creditCard.allowedLimit - creditAccount.limitUsage) < transaction.amount)) { throw new APIError({ message: 'Reaching credit card limit', status: httpStatus.CONFLICT }); }
       if (creditCard.expirationDate < Date.now()) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
       transaction.gatewayId = creditCard._id.toString();
-      console.log('====================================');
-      console.log('Credit card', transaction);
-      console.log('====================================');
     }
     transaction = { ...transaction, creditAccount: creditAccount._id.toString(), currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
   } else {

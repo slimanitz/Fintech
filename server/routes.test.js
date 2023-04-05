@@ -46,7 +46,6 @@ describe('Testing Client API Endpoints', () => {
 
   describe('POST /api/users', () => {
     test('should create an account', async () => {
-      console.log(user);
       const res = await request(app).post('/api/users').send(user);
       user._id = res.body._id;
       expect(res.status).toEqual(200);
