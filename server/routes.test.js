@@ -251,6 +251,7 @@ describe('Testing Client API Endpoints', () => {
       expect(res.body.amount).toEqual(2000);
       expect(res.body.debitAccount).toEqual(account._id);
       expect(res.body.creditAccount).toEqual(creditAccount._id);
+      expect(res.body.currencyExchange).toEqual(`${account.currency}/${creditAccount.currency}`);
     });
 
     describe('POST /api/users/:userId/accounts/:accountId/transactions', () => {
@@ -259,9 +260,6 @@ describe('Testing Client API Endpoints', () => {
         const login = await request(app).post('/api/users/login').send({ email: newUser.body.email, password: 'password' });
         const accountResponse = await request(app).post(`/api/users/${newUser.body._id}/accounts`).set('Authorization', `Bearer ${login.body.token}`).send({ type: accountTypesEnum.BASIC });
         const creditAccount = accountResponse.body;
-        console.log('====================================');
-        console.log(creditCard);
-        console.log('====================================');
 
         const payload = {
           amount: 2000,

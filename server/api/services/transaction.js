@@ -16,6 +16,7 @@ const insertionSchema = Joi.object({
   gatewayId: Joi.string(),
   comment: Joi.string(),
   userId: Joi.string().required(),
+  currencyExchange: Joi.string().required(),
 
 });
 
@@ -95,7 +96,7 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
     if (creditCard.expirationDate < Date.now()) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
     transaction.gatewayId = creditCard._id.toString();
   }
-  transaction = { ...transaction, creditAccount: creditAccount._id.toString() };
+  transaction = { ...transaction, creditAccount: creditAccount._id.toString(), currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
   delete transaction.creditAccountIban;
   delete transaction.creditCardInfo;
 

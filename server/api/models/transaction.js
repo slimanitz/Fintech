@@ -17,6 +17,7 @@ const transactionSchema = new mongoose.Schema(
     gateway: { type: String, enum: Object.values(transactionGatewayEnum) },
     gatewayId: { type: mongoose.Types.ObjectId, required: true },
     comment: { type: String, default: '' },
+    currencyExchange: { type: String },
 
   },
   { timestamps: true },
