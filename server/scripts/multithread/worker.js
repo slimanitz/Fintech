@@ -18,7 +18,7 @@ const simulation = async ({ email, password }, accounts) => {
     const loginResponse = await instance.post('/users/login', { email, password: 'password' });
     if (loginResponse.status !== 200) throw new Error('');
     instance.defaults.headers.common.Authorization = `Bearer ${loginResponse.data.token}`;
-    const user = loginResponse.data._doc;
+    const user = loginResponse.data;
 
     // STEP Create account and make transactions
     // const accountsResponse = await instance.get(`/users/${user._id}/accounts`);
@@ -34,7 +34,7 @@ const simulation = async ({ email, password }, accounts) => {
       const payload = {
         amount: 2000,
         gateway: transactionGatewayEnum.TRANSFER,
-        creditAccountIban: creditAcccount._doc.iban,
+        creditAccountIban: creditAcccount.iban,
         comment: 'Test transaction ',
       };
 
@@ -51,7 +51,7 @@ const simulation = async ({ email, password }, accounts) => {
       const payload = {
         amount: 2000,
         gateway: transactionGatewayEnum.CREDIT_CARD,
-        creditAccountIban: creditAcccount._doc.iban,
+        creditAccountIban: creditAcccount.iban,
         creditCardInfo: {
           number: creditCard.data.number,
           securityCode: creditCard.data.securityCode,
@@ -76,6 +76,6 @@ const simulation = async ({ email, password }, accounts) => {
 
 module.exports = async ({ users, accounts }) => {
   const values = await Promise
-    .all(users.map(async (user) => await simulation(user._doc, accounts)));
+    .all(users.map(async (user) => await simulation(user, accounts)));
   return values;
 };
