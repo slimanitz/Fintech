@@ -90,7 +90,7 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
   if (transaction.gateway === transactionGatewayEnum.CREDIT_CARD) {
     const creditCard = await CreditCard.findOne({ ...transaction.creditCardInfo });
     if (!creditCard) throw new APIError({ message: 'Credit card not found', status: httpStatus.NOT_FOUND });
-    if (creditCard.isActive) throw new APIError({ message: 'Credit card  not active', status: httpStatus.CONFLICT });
+    if (!creditCard.isActive) throw new APIError({ message: 'Credit card  not active', status: httpStatus.CONFLICT });
     if (((creditCard.allowedLimit - creditAccount.limitUsage) < transaction.amount)) { throw new APIError({ message: 'Reaching credit card limit', status: httpStatus.CONFLICT }); }
     if (creditCard.expirationDate < Date.now()) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
     transaction.gatewayId = creditCard._id.toString();

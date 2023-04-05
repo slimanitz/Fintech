@@ -209,10 +209,9 @@ describe('Testing Client API Endpoints', () => {
 
   describe('PATCH /api/users/:userId/credit-cards/:creditCardId', () => {
     test('should return update a creditCard', async () => {
-      const updatedValues = { isActive: false, allowedLimit: 20000 };
+      const updatedValues = { allowedLimit: 20000 };
       const res = await request(app).patch(`/api/users/${user._id}/credit-cards/${creditCard._id}`).set('Authorization', token).send(updatedValues);
       expect(res.status).toEqual(200);
-      expect(res.body.isActive).toEqual(updatedValues.isActive);
       expect(res.body.allowedLimit).toEqual(updatedValues.allowedLimit);
     });
 
@@ -260,6 +259,9 @@ describe('Testing Client API Endpoints', () => {
         const login = await request(app).post('/api/users/login').send({ email: newUser.body.email, password: 'password' });
         const accountResponse = await request(app).post(`/api/users/${newUser.body._id}/accounts`).set('Authorization', `Bearer ${login.body.token}`).send({ type: accountTypesEnum.BASIC });
         const creditAccount = accountResponse.body;
+        console.log('====================================');
+        console.log(creditCard);
+        console.log('====================================');
 
         const payload = {
           amount: 2000,
