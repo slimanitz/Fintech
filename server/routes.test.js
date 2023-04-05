@@ -253,6 +253,43 @@ describe('Testing Client API Endpoints', () => {
       expect(res.body.creditAccount).toEqual(creditAccount._id);
       expect(res.body.currencyExchange).toEqual(`${account.currency}/${creditAccount.currency}`);
     });
+    test('should create a transaction with bank DEPOSIT', async () => {
+      const accountResponse = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
+      const creditAccount = accountResponse.body;
+
+      const payload = {
+        amount: 2000,
+        gateway: transactionGatewayEnum.DEPOSIT,
+        creditAccountIban: creditAccount.iban,
+        comment: 'Test transaction',
+      };
+
+      const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+      expect(res.status).toEqual(200);
+      expect(res.body.amount).toEqual(2000);
+      expect(res.body.debitAccount).toEqual(account._id);
+      expect(res.body.creditAccount).toEqual(creditAccount._id);
+      expect(res.body.currencyExchange).toEqual(`${creditAccount.currency}/${creditAccount.currency}`);
+    });
+
+    test('should create a transaction with bank CHECK', async () => {
+      const accountResponse = await request(app).post(`/api/users/${user._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
+      const creditAccount = accountResponse.body;
+
+      const payload = {
+        amount: 2000,
+        gateway: transactionGatewayEnum.CHECK,
+        creditAccountIban: creditAccount.iban,
+        comment: 'Test transaction',
+      };
+
+      const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+      expect(res.status).toEqual(200);
+      expect(res.body.amount).toEqual(2000);
+      expect(res.body.debitAccount).toEqual(account._id);
+      expect(res.body.creditAccount).toEqual(creditAccount._id);
+      expect(res.body.currencyExchange).toEqual(`${account.currency}/${creditAccount.currency}`);
+    });
 
     describe('POST /api/users/:userId/accounts/:accountId/transactions', () => {
       test('should create a transaction with credit Card ', async () => {

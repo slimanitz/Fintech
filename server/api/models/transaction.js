@@ -15,7 +15,7 @@ const transactionSchema = new mongoose.Schema(
       default: transactionStatusEnum.PENDING,
     },
     gateway: { type: String, enum: Object.values(transactionGatewayEnum) },
-    gatewayId: { type: mongoose.Types.ObjectId, required: true },
+    gatewayId: { type: mongoose.Types.ObjectId },
     comment: { type: String, default: '' },
     currencyExchange: { type: String },
 
