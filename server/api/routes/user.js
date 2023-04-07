@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  create, get,
+  create,
   getAll, update, remove, login, createUserAccount,
   getAllUserAccounts, getUserAccount,
   updateUserAccount, createUserCreditCard,
