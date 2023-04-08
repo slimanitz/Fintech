@@ -24,7 +24,7 @@ const updateSchema = Joi.object({
 });
 
 function filter(arr, criteria) {
-  return arr.filter((obj) => Object.keys(criteria).every((c) => obj[c] === criteria[c]));
+  return arr.filter((obj) => Object.keys(criteria).every((c) => obj[c] == criteria[c]));
 }
 
 const create = async (user) => {
@@ -37,31 +37,30 @@ const create = async (user) => {
   return newUser;
 };
 
-// const get = async (id) => {
-//   if (!ObjectId.isValid(id)) {
-//     throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-//   }
-//   let user = await redisClient.getList('users');
-//   if (user.length === 0) {
-//     user = await User.findById(id);
-//     await redisClient.setList('users', user);
-//   }
-//   if (!user) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-//   return user;
-// };
-
-const getAll = async (filters) => {
+const getAll = async (filters, isArray = true) => {
   let users = await redisClient.getList('users');
   if (users.length === 0) {
-    users = await User.find({ ...filters });
+    users = await User.find().lean();
     await redisClient.setList('users', users);
-  } else if (filters) { users = filter(users, filters); }
-  return users;
+  }
+  if (filters) { users = filter(users, filters); }
+  if (!isArray) {
+    if (users.length > 1) { throw new APIError({ message: 'More than one element in the array' }); } return users[0];
+  } return users;
+};
+
+const get = async (id) => {
+  if (!ObjectId.isValid(id)) {
+    throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
+  }
+  const user = await getAll({ _id: id }, false);
+  if (!user) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
+  return user;
 };
 
 const login = async ({ email, password }) => {
   const hashpassword = crypto.createHash('sha1').update(password, 'binary').digest('hex');
-  const user = await getAll({ email, password: hashpassword, isActive: true });
+  const user = await getAll({ email, password: hashpassword, isActive: true }, false);
   if (!user) throw new APIError({ message: 'Wrong credentials', status: httpStatus.UNAUTHORIZED });
   const token = jwt.sign({ user }, jwtSecret, { expiresIn: '2h' });
   delete user.password;
@@ -89,6 +88,7 @@ const remove = async (id) => {
 module.exports.userService = {
   create,
   getAll,
+  get,
   update,
   remove,
   login,
