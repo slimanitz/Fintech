@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  create, get, getAll, update, remove,
+  create, getAll, update, remove, get,
 } = require('../controllers/transaction');
 
 const router = express.Router();

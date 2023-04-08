@@ -9,6 +9,7 @@ const {
   createUserTransaction,
   getAllUserTransactions,
   getUserTransaction,
+  get,
 } = require('../controllers/user');
 const { userRolesEnum } = require('../../utils/enums');
 const JWTCheck = require('../../middlewares/jwt-check');
@@ -18,7 +19,7 @@ const router = express.Router();
 
 // USERS
 router.post('/', create);
-// router.get('/:id', get);
+router.get('/:id', get);
 router.post('/login', login);
 router.get('/', getAll);
 router.patch('/:id', update);
