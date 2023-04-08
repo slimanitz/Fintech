@@ -14,9 +14,9 @@ const coherenceCheck = async (req, res, next) => {
     userId, accountId, creditCardId, transactionId,
   } = req.params;
 
-  if (accountId && !(await Account.find({ userId, _id: accountId }))) { throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT }); }
-  if (creditCardId && !(await CreditCard.find({ userId, _id: creditCardId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
-  if (transactionId && !(await Transaction.find({ userId, _id: transactionId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
+  if (accountId && !(await Account.findOne({ userId, _id: accountId }))) { throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT }); }
+  if (creditCardId && !(await CreditCard.findOne({ userId, _id: creditCardId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
+  if (transactionId && !(await Transaction.findOne({ userId, _id: transactionId }))) throw new APIError({ message: 'Trying to access to someone else assets', status: httpStatus.CONFLICT });
 
   return next();
 };
