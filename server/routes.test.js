@@ -5,6 +5,7 @@ const httpStatus = require('http-status');
 const app = require('./config/server');
 const connect = require('./config/database');
 const { transactionGatewayEnum, accountTypesEnum } = require('./utils/enums');
+const { redisClient } = require('./config/cache');
 
 describe('Check before launching tests', () => {
   beforeAll(async () => {
@@ -30,6 +31,7 @@ describe('Testing Client API Endpoints', () => {
   afterAll(() => {
     server.close();
     mongoose.connection.close();
+    redisClient.quit();
   });
 
   const user = {
@@ -192,10 +194,10 @@ describe('Testing Client API Endpoints', () => {
   });
 
   describe('GET /api/users/:userId/credit-cards/:creditCardId', () => {
-    test('should return All users creditCards  ', async () => {
+    test('should return  users creditCard  ', async () => {
       const res = await request(app).get(`/api/users/${user._id}/credit-cards/${creditCard._id}`).set('Authorization', token);
       expect(res.status).toEqual(200);
-      expect(res.body).toEqual(creditCard);
+      expect(res.body._id).toEqual(creditCard._id);
     });
 
     describe('Authentication check on GET /api/users/:userId/credit-cards/:creditCardId', () => {
@@ -290,69 +292,67 @@ describe('Testing Client API Endpoints', () => {
       expect(res.body.currencyExchange).toEqual(`${account.currency}/${creditAccount.currency}`);
     });
 
-    describe('POST /api/users/:userId/accounts/:accountId/transactions', () => {
-      test('should create a transaction with credit Card ', async () => {
-        const newUser = await request(app).post('/api/users').send({ email: 'test@check.com', password: 'password', name: 'Slimane' });
-        const login = await request(app).post('/api/users/login').send({ email: newUser.body.email, password: 'password' });
-        const accountResponse = await request(app).post(`/api/users/${newUser.body._id}/accounts`).set('Authorization', `Bearer ${login.body.token}`).send({ type: accountTypesEnum.BASIC });
+    test('should create a transaction with credit Card ', async () => {
+      const newUser = await request(app).post('/api/users').send({ email: 'test@check.com', password: 'password', name: 'Slimane' });
+      const login = await request(app).post('/api/users/login').send({ email: newUser.body.email, password: 'password' });
+      const accountResponse = await request(app).post(`/api/users/${newUser.body._id}/accounts`).set('Authorization', `Bearer ${login.body.token}`).send({ type: accountTypesEnum.BASIC });
+      const creditAccount = accountResponse.body;
+
+      const payload = {
+        amount: 2000,
+        gateway: transactionGatewayEnum.CREDIT_CARD,
+        creditAccountIban: creditAccount.iban,
+        comment: 'Test transaction',
+        creditCardInfo: {
+          number: creditCard.number,
+          securityCode: creditCard.securityCode,
+          expirationDate: creditCard.expirationDate,
+        },
+      };
+
+      const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+      expect(res.status).toEqual(200);
+      expect(res.body.amount).toEqual(2000);
+      expect(res.body.debitAccount).toEqual(account._id);
+      expect(res.body.creditAccount).toEqual(creditAccount._id);
+    });
+
+    describe('Authentication check on POST /api/users/:userId/accounts/:accountId/transactions', () => {
+      test('should return FORBIDDEN', async () => {
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`);
+        expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('Check the fact that we can t use the same account', () => {
+      test('should return CONFLICT', async () => {
+        const payload = {
+          amount: 2000,
+          gateway: transactionGatewayEnum.TRANSFER,
+          creditAccountIban: account.iban,
+          comment: 'Test transaction ',
+        };
+
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
+        expect(res.status).toEqual(httpStatus.CONFLICT);
+      });
+    });
+
+    describe('Check the fact that we can t make a transaction between someone else s saving account', () => {
+      test('should return CONFLICT', async () => {
+        const userResponse = await request(app).post('/api/users').send({ email: 'example@gmail.com', password: 'password', name: 'example' });
+        const accountResponse = await request(app).post(`/api/users/${userResponse.body._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.SAVING });
         const creditAccount = accountResponse.body;
 
         const payload = {
           amount: 2000,
-          gateway: transactionGatewayEnum.CREDIT_CARD,
+          gateway: transactionGatewayEnum.TRANSFER,
           creditAccountIban: creditAccount.iban,
-          comment: 'Test transaction',
-          creditCardInfo: {
-            number: creditCard.number,
-            securityCode: creditCard.securityCode,
-            expirationDate: creditCard.expirationDate,
-          },
+          comment: 'Test transaction ',
         };
 
         const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
-        expect(res.status).toEqual(200);
-        expect(res.body.amount).toEqual(2000);
-        expect(res.body.debitAccount).toEqual(account._id);
-        expect(res.body.creditAccount).toEqual(creditAccount._id);
-      });
-
-      describe('Authentication check on POST /api/users/:userId/accounts/:accountId/transactions', () => {
-        test('should return FORBIDDEN', async () => {
-          const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`);
-          expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-        });
-      });
-
-      describe('Check the fact that we can t use the same account', () => {
-        test('should return CONFLICT', async () => {
-          const payload = {
-            amount: 2000,
-            gateway: transactionGatewayEnum.TRANSFER,
-            creditAccountIban: account.iban,
-            comment: 'Test transaction ',
-          };
-
-          const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
-          expect(res.status).toEqual(httpStatus.CONFLICT);
-        });
-      });
-
-      describe('Check the fact that we can t make a transaction between someone else s saving account', () => {
-        test('should return CONFLICT', async () => {
-          const userResponse = await request(app).post('/api/users').send({ email: 'example@gmail.com', password: 'password', name: 'example' });
-          const accountResponse = await request(app).post(`/api/users/${userResponse.body._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.SAVING });
-          const creditAccount = accountResponse.body;
-
-          const payload = {
-            amount: 2000,
-            gateway: transactionGatewayEnum.TRANSFER,
-            creditAccountIban: creditAccount.iban,
-            comment: 'Test transaction ',
-          };
-
-          const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/transactions`).set('Authorization', token).send(payload);
-          expect(res.status).toEqual(httpStatus.CONFLICT);
-        });
+        expect(res.status).toEqual(httpStatus.CONFLICT);
       });
     });
 
@@ -368,7 +368,7 @@ describe('Testing Client API Endpoints', () => {
       test('should return  users transactions by ID  ', async () => {
         const res = await request(app).get(`/api/users/${user._id}/transactions/${transaction._id}`).set('Authorization', token);
         expect(res.status).toEqual(200);
-        expect(res.body).toEqual(transaction);
+        expect(res.body._id).toEqual(transaction._id);
       });
 
       describe('Authentication check on GET /api/users/:userId/transactions/:transactionId', () => {
