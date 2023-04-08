@@ -5,7 +5,7 @@ const mongoClient = require('../../config/database');
 const creditCardSchema = new mongoose.Schema(
   {
     number: { type: String, unique: true },
-    expirationDate: { type: Date },
+    expirationDate: { type: String },
     isActive: { type: Boolean, default: true },
     securityCode: { type: String },
     accountId: { type: mongoose.Types.ObjectId, required: true },
