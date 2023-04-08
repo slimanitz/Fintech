@@ -7,6 +7,7 @@
     "sim": "APP_ENV=local node ./scripts/simulation.js",
     "dummy": "APP_ENV=local node ./scripts/dummy.js",
     "dev": "APP_ENV=local nodemon app.js",
+    "prod": "APP_ENV=production node app.js",
     "crud:create": "node ./scripts/crud-creation.js",
     "test": "APP_ENV=test jest --setupFiles dotenv/config --detectOpenHandles --forceExit --collectCoverage"
   },
