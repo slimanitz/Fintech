@@ -25,6 +25,8 @@ jobs:
         registry-url: 'https://registry.yarnpkg.com'
         cache: 'yarn'
         cache-dependency-path: ./server/yarn.lock
+    - name: Redis Server in GitHub Actions
+      uses: supercharge/redis-github-action@1.5.0
     - name: Install dependencies
       run: yarn --cwd ./server/ install
     - name: Test
