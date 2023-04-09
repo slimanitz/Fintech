@@ -21,7 +21,7 @@ const main = async () => {
     role: 'CLIENT',
   });
 
-  for (let index = 0; index < 10000; index++) {
+  for (let index = 0; index < 100; index++) {
     users.push({
       name: faker.name.fullName(),
       email: index + faker.internet.email(),
@@ -33,7 +33,7 @@ const main = async () => {
   users = await User.insertMany(users);
   console.log('Users created succesfully');
 
-  for (let index = 0; index < 1000; index++) {
+  for (let index = 0; index < 300; index++) {
     accounts.push({
       userId: users[Math.floor(Math.random() * users.length)],
       type: Object
@@ -48,11 +48,15 @@ const main = async () => {
   accounts = await Account.insertMany(accounts);
   console.log('Bank accounts created');
 
-  for (let index = 0; index < 1500; index++) {
+  for (let index = 0; index < 1000; index++) {
     const account = accounts[Math.floor(Math.random() * accounts.length)];
+    const dateObj = new Date(new Date().setFullYear(new Date().getFullYear() + 2));
+    const month = dateObj.getUTCMonth() + 1; // months from 1-12
+    const year = dateObj.getUTCFullYear();
+    const expirationDate = `${month}/${year}`;
     creditCards.push({
       number: faker.finance.creditCardNumber().replaceAll('-', ''),
-      expirationDate: faker.date.future(),
+      expirationDate,
       securityCode: faker.finance.creditCardCVV(),
       accountId: account._id,
       userId: account.userId,
