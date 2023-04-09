@@ -6,7 +6,7 @@ const redisClient = new Redis({
   password: redisPassword,
   socket: {
     host: redisHost,
-    port: redisPort,
+    port: +redisPort,
   },
   commandTimeout: 5000,
   retryStrategy: () => 5000,
@@ -23,7 +23,12 @@ redisClient.setList = (key, list) => (
 redisClient.getList = async (key) => {
   const keysList = await redisClient.lrange(key, 0, -1);
   const list = await Promise.all(keysList
-    .map((elementKey) => (redisClient.hgetall(elementKey))));
+    .map(async (elementKey) => {
+      const object = await redisClient.hgetall(elementKey);
+      if (object.isActive === 'true') object.isActive = true;
+      if (object.isActive === 'false') object.isActive = false;
+      return object;
+    }));
   return list;
 };
 
