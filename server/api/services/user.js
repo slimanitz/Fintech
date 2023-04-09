@@ -40,12 +40,12 @@ const create = async (user) => {
 const getAll = async (filters, isArray = true) => {
   let users = await redisClient.getList('users');
   if (users.length === 0) {
-    users = await User.find().lean();
+    users = await User.find();
     await redisClient.setList('users', users);
   }
   if (filters) { users = filter(users, filters); }
   if (!isArray) {
-    if (users.length > 1) { throw new APIError({ message: 'More than one element in the array' }); } return users[0];
+    return users[0] || null;
   } return users;
 };
 

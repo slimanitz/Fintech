@@ -50,7 +50,6 @@ const getAll = async (filters, isArray = true) => {
   }
   if (filters) creditCards = filter(creditCards, filters);
   if (!isArray) {
-    if (creditCards.length > 1) { throw new APIError({ message: 'More than one element in the array' }); }
     return creditCards[0];
   }
   return creditCards;

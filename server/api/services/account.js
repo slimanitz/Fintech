@@ -47,7 +47,6 @@ const getAll = async (filters, isArray = true) => {
   }
   if (filters) accounts = filter(accounts, filters);
   if (!isArray) {
-    if (accounts.length > 1) { throw new APIError({ message: 'More than one element in the array' }); }
     return accounts[0];
   }
   return accounts;
