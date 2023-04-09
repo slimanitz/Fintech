@@ -5,6 +5,7 @@ const { host } = require('./config/vars');
 
 app.listen(8080, async () => {
   await connect();
+  console.log(redisClient.status);
   console.log(`The server is running on ${host}`);
 });
 
