@@ -5,6 +5,9 @@ const axios = require('axios');
 const { host } = require('../../config/vars');
 const { transactionGatewayEnum, accountTypesEnum } = require('../../utils/enums');
 
+let requestSuccess = 0;
+let totalRequests = 0;
+
 const simulation = async ({ email, password }, accounts) => {
   try {
     const start = Date.now();
@@ -16,13 +19,16 @@ const simulation = async ({ email, password }, accounts) => {
     // Step 1 Login
 
     const loginResponse = await instance.post('/users/login', { email, password: 'password' });
-    if (loginResponse.status !== 200) throw new Error('');
+    totalRequests++;
+    if (loginResponse.status !== 200) requestSuccess++;
     instance.defaults.headers.common.Authorization = `Bearer ${loginResponse.data.token}`;
     const user = loginResponse.data;
 
     // STEP Create account and make transactions
     // const accountsResponse = await instance.get(`/users/${user._id}/accounts`);
     const accountResponse = await instance.post(`/users/${user._id}/accounts`, { type: accountTypesEnum.BASIC });
+    totalRequests++;
+    if (accountResponse.status === 200) requestSuccess++;
 
     const account = accountResponse.data;
 
@@ -38,7 +44,9 @@ const simulation = async ({ email, password }, accounts) => {
         comment: 'Test transaction ',
       };
 
-      await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      const res = await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      totalRequests++;
+      if (res.status === 200) requestSuccess++;
     }
 
     const creditCard = await instance.post(`/users/${user._id}/accounts/${account._id}/credit-cards`);
@@ -60,17 +68,19 @@ const simulation = async ({ email, password }, accounts) => {
         comment: 'Test transaction ',
       };
 
-      await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      const res = await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      totalRequests++;
+      if (res.status === 200) requestSuccess++;
     }
 
     const end = Date.now();
 
-    return { delay: end - start };
+    return { delay: end - start, success: `${requestSuccess}/${totalRequests}` };
   } catch (e) {
     console.log('====================================');
     console.log(e.message);
     console.log('====================================');
-    return { delay: 0 };
+    return { delay: 0, success: `${requestSuccess}/${totalRequests}` };
   }
 };
 
