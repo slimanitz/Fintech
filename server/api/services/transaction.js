@@ -12,7 +12,7 @@ const insertionSchema = Joi.object({
   creditAccount: Joi.string().required(),
   debitAccount: Joi.any(),
   amount: Joi.number().required(),
-  status: Joi.boolean().valid(...Object.values(transactionStatusEnum)),
+  status: Joi.string().valid(...Object.values(transactionStatusEnum)),
   gateway: Joi.string().valid(...Object.values(transactionGatewayEnum)).required(),
   gatewayId: Joi.alternatives().conditional('gateway', {
     is: Joi.string()
