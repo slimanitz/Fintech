@@ -74,10 +74,15 @@ const ibanToCurrencies = {
   XK: 'EUR',
 };
 
+const subscriptionTypes = { DEBIT: 'DEBIT', CREDIT: 'CREDIT' };
+const subscriptionFrequency = { DAILY: 'DAILY', WEEKLY: 'WEEKLY', MONTHLY: 'MONTHLY' };
+
 module.exports = {
   ibanToCurrencies,
   accountTypesEnum,
   userRolesEnum,
   transactionGatewayEnum,
   transactionStatusEnum,
+  subscriptionTypes,
+  subscriptionFrequency,
 };
