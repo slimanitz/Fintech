@@ -4,7 +4,7 @@ const { default: mongoose } = require('mongoose');
 const httpStatus = require('http-status');
 const app = require('./config/server');
 const connect = require('./config/database');
-const { transactionGatewayEnum, accountTypesEnum } = require('./utils/enums');
+const { transactionGatewayEnum, accountTypesEnum, subscriptionFrequency } = require('./utils/enums');
 const { redisClient } = require('./config/cache');
 
 describe('Check before launching tests', () => {
@@ -379,64 +379,25 @@ describe('Testing Client API Endpoints', () => {
       });
     });
 
-    // describe('GET /api/users/:userId/credit-cards/:creditCardId', () => {
-    //   test('should return All users creditCards  ', async () => {
-    //     const res = await request(app).get(`/api/users/${user._id}/credit-cards/${creditCard._id}`).set('Authorization', token);
-    //     expect(res.status).toEqual(200);
-    //     expect(res.body).toEqual(creditCard);
-    //   });
+    // ================Subscriptions=================
+    describe('POST /api/users/:userId/accounts/:accountId/subscriptions', () => {
+      test('should return a subscription', async () => {
+        const userResponse = await request(app).post('/api/users').send({ email: 'example2@gmail.com', password: 'password', name: 'example' });
+        const accountResponse = await request(app).post(`/api/users/${userResponse.body._id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
+        const creditAccount = accountResponse.body;
 
-    //   describe('Authentication check on GET /api/users/:userId/credit-cards/:creditCardId', () => {
-    //     test('should return FORBIDDEN', async () => {
-    //       const res = await request(app).get(`/api/users/${user._id}/credit-cards/${creditCard._id}`);
-    //       expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-    //     });
-    //   });
-    // });
+        const payload = {
+          amount: 2000,
+          creditAccountIban: creditAccount.iban,
+          name: 'Test Subscription ',
+          frequency: subscriptionFrequency.MONTHLY,
+          finishDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
 
-    // describe('GET /api/users/:userId/accounts', () => {
-    //   test('should return all user accounts', async () => {
-    //     const res = await request(app).get(`/api/users/${user._id}/accounts`).set('Authorization', token);
-    //     expect(res.status).toEqual(200);
-    //     expect(res.body[0].userId).toEqual(user._id);
-    //   });
+        };
 
-    //   describe('Authentication check on GET /api/users/:userId/accounts', () => {
-    //     test('should return FORBIDDEN', async () => {
-    //       const res = await request(app).get(`/api/users/${user._id}/accounts`);
-    //       expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-    //     });
-    //   });
-    // });
-
-    // describe('GET /api/users/:userId/accounts/:accountId', () => {
-    //   test('should return all user accounts', async () => {
-    //     const res = await request(app).get(`/api/users/${user._id}/accounts/${account._id}`).set('Authorization', token);
-    //     expect(res.status).toEqual(200);
-    //     expect(res.body.userId).toEqual(user._id);
-    //     expect(res.body._id).toEqual(account._id);
-    //   });
-
-    //   describe('Authentication check on GET /api/users/:userId/accounts', () => {
-    //     test('should return FORBIDDEN', async () => {
-    //       const res = await request(app).get(`/api/users/${user._id}/accounts`);
-    //       expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-    //     });
-    //   });
-    // });
-
-    // describe('PATCH /api/users/:userId/accounts/:accountId', () => {
-    //   test('should return update user accounts', async () => {
-    //     const res = await request(app).patch(`/api/users/${user._id}/accounts/${account._id}`).set('Authorization', token).send({ isActive: false });
-    //     expect(res.status).toEqual(200);
-    //     expect(res.body.isActive).toEqual(false);
-    //     expect(res.body._id).toEqual(account._id);
-    //   });
-
-  //   test('Authentication check should return FORBIDDEN', async () => {
-  //     const res = await request(app).patch(`/api/users/${user._id}/accounts/${account._id}`);
-  //     expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
-  //   });
-  // });
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/subscriptions`).set('Authorization', token).send(payload);
+        expect(res.status).toEqual(httpStatus.OK);
+      });
+    });
   });
 });
