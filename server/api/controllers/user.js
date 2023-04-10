@@ -3,6 +3,7 @@ const { userService } = require('../services/user');
 const { accountService } = require('../services/account');
 const { creditCardService } = require('../services/creditCard');
 const { transactionService } = require('../services/transaction');
+const { subscriptionService } = require('../services/subscription');
 
 // USER
 const create = async (req, res) => {
@@ -91,6 +92,11 @@ const getUserTransaction = async (req, res) => {
   res.status(httpStatus.OK).json(transaction);
 };
 
+// Subscriptions
+const createUserSubscription = async (req, res) => {
+  const subscription = await subscriptionService.createUserSubscription(req.params, req.body);
+  res.status(httpStatus.OK).json(subscription);
+};
 module.exports = {
   create,
   get,
@@ -109,5 +115,6 @@ module.exports = {
   createUserTransaction,
   getAllUserTransactions,
   getUserTransaction,
+  createUserSubscription,
 
 };
