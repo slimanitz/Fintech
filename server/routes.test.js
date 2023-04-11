@@ -42,6 +42,7 @@ describe('Testing Client API Endpoints', () => {
   let account;
   let creditCard;
   let transaction;
+  let subscription;
   let token = 'Bearer ';
 
   // ================USER=================
@@ -396,7 +397,36 @@ describe('Testing Client API Endpoints', () => {
         };
 
         const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/subscriptions`).set('Authorization', token).send(payload);
+        subscription = res.body;
         expect(res.status).toEqual(httpStatus.OK);
+      });
+    });
+
+    describe('Authentication check on POST /api/users/:userId/accounts/:accountId/subscriptions', () => {
+      test('should return FORBIDDEN', async () => {
+        const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/subscriptions`);
+        expect(res.status).toEqual(httpStatus.UNAUTHORIZED);
+      });
+    });
+
+    describe('GET /api/users/:userId/subscriptions', () => {
+      test('should return All users subscriptions  ', async () => {
+        const res = await request(app).get(`/api/users/${user._id}/subscriptions`).set('Authorization', token);
+        expect(res.status).toEqual(200);
+        expect(res.body).toContainEqual(subscription);
+      });
+    });
+
+    describe('PATCH /api/users/:userId/accounts/:accountId/subscriptions', () => {
+      test('should return a subscription', async () => {
+        const payload = {
+          name: 'Test Subscription  2',
+          isCancelled: true,
+        };
+
+        const res = await request(app).patch(`/api/users/${user._id}/subscriptions/${subscription._id}`).set('Authorization', token).send(payload);
+        expect(res.status).toEqual(httpStatus.OK);
+        expect(res.body.isCancelled).toEqual(true);
       });
     });
   });
