@@ -97,6 +97,17 @@ const createUserSubscription = async (req, res) => {
   const subscription = await subscriptionService.createUserSubscription(req.params, req.body);
   res.status(httpStatus.OK).json(subscription);
 };
+
+const getAllUserSubscriptions = async (req, res) => {
+  const subscriptions = await subscriptionService.getAllUsersSubscriptions(req.params, req.body);
+  res.status(httpStatus.OK).json(subscriptions);
+};
+
+const updateUserSubscription = async (req, res) => {
+  const subscription = await subscriptionService.updateUserSubscription(req.params, req.body);
+  res.status(httpStatus.OK).json(subscription);
+};
+
 module.exports = {
   create,
   get,
@@ -116,5 +127,7 @@ module.exports = {
   getAllUserTransactions,
   getUserTransaction,
   createUserSubscription,
+  getAllUserSubscriptions,
+  updateUserSubscription,
 
 };

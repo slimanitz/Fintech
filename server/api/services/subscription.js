@@ -32,7 +32,6 @@ const createUserSubscriptionSchema = Joi.object({
 
 const updateUserSubscriptionSchema = Joi.object({
   name: Joi.string().required(),
-  type: Joi.string().valid(...Object.values(subscriptionTypes)).required(),
   isCancelled: Joi.boolean(),
 
 });
@@ -92,9 +91,6 @@ const remove = async (id) => {
 
 const createUserSubscription = async ({ userId, accountId }, payload) => {
   let subscription = { ...payload, userId, debitAccount: accountId };
-  console.log('====================================');
-  console.log(subscription);
-  console.log('====================================');
   const { error } = createUserSubscriptionSchema.validate(subscription);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const creditAccount = await accountService
@@ -117,6 +113,27 @@ const createUserSubscription = async ({ userId, accountId }, payload) => {
   return subscription;
 };
 
+const getAllUsersSubscriptions = async ({ userId }) => {
+  if (!ObjectId.isValid(userId)) {
+    throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
+  }
+  const creditCards = await getAll({ userId });
+  return creditCards;
+};
+
+const updateUserSubscription = async ({ userId, subscriptionId }, payload) => {
+  if (!ObjectId.isValid(userId) || !ObjectId.isValid(subscriptionId)) {
+    throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
+  }
+  const { error, value } = updateUserSubscriptionSchema.validate(payload);
+  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  const updatedValue = await Subscription
+    .findOneAndUpdate({ _id: subscriptionId, userId }, { $set: value }, { new: true });
+  if (!updatedValue) throw new APIError({ message: 'No Subscription found', status: httpStatus.NOT_FOUND });
+  await redisClient.deleteList('creditCards');
+  return updatedValue;
+};
+
 module.exports.subscriptionService = {
   create,
   get,
@@ -124,4 +141,6 @@ module.exports.subscriptionService = {
   update,
   remove,
   createUserSubscription,
+  getAllUsersSubscriptions,
+  updateUserSubscription,
 };

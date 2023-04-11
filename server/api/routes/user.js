@@ -11,6 +11,8 @@ const {
   getUserTransaction,
   get,
   createUserSubscription,
+  getAllUserSubscriptions,
+  updateUserSubscription,
 } = require('../controllers/user');
 const { userRolesEnum } = require('../../utils/enums');
 const JWTCheck = require('../../middlewares/jwt-check');
@@ -45,7 +47,7 @@ router.get('/:userId/transactions/:transactionId', JWTCheck([userRolesEnum.CLIEN
 
 // Subscriptions
 router.post('/:userId/accounts/:accountId/subscriptions', JWTCheck([userRolesEnum.CLIENT]), createUserSubscription);
-// router.get('/:userId/subscriptions', JWTCheck([userRolesEnum.CLIENT]), getAllUserTransactions);
-// router.get('/:userId/subscriptions/:subscriptionId', JWTCheck([userRolesEnum.CLIENT]), getUserTransaction);
+router.get('/:userId/subscriptions', JWTCheck([userRolesEnum.CLIENT]), getAllUserSubscriptions);
+router.patch('/:userId/subscriptions/:subscriptionId', JWTCheck([userRolesEnum.CLIENT]), updateUserSubscription);
 
 module.exports = router;
