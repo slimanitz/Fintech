@@ -24,7 +24,7 @@ const main = async () => {
   for (let index = 0; index < 100; index++) {
     users.push({
       name: faker.name.fullName(),
-      email: index + faker.internet.email(),
+      email: index + faker.internet.email().toLowerCase(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
       role: Object
         .values(userRolesEnum)[Math.floor(Math.random() * Object.values(userRolesEnum).length)],
