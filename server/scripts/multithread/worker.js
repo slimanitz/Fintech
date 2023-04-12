@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /* worker-pool.js */
 
 const axios = require('axios');

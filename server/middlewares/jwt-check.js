@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
 const httpStatus = require('http-status');
 const User = require('../api/models/user');

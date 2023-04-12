@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const request = require('supertest');
 const { default: mongoose } = require('mongoose');
 const httpStatus = require('http-status');
@@ -393,7 +392,6 @@ describe('Testing Client API Endpoints', () => {
           name: 'Test Subscription ',
           frequency: subscriptionFrequency.MONTHLY,
           finishDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-
         };
 
         const res = await request(app).post(`/api/users/${user._id}/accounts/${account._id}/subscriptions`).set('Authorization', token).send(payload);
