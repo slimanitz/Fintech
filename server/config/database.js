@@ -1,9 +1,14 @@
-const { default: mongoose } = require('mongoose');
-const { mongoUrl } = require('./vars');
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize('mysql://ecom:password@localhost:3306/ecom');
 
 const connect = async () => {
-  await mongoose.connect(mongoUrl);
-  console.log('DB Up and running');
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
 };
 
-module.exports = connect;
+module.exports = { sequelize, connect };
