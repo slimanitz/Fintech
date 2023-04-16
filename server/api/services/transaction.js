@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
@@ -51,8 +50,7 @@ function filter(arr, criteria) {
 const create = async (transaction) => {
   const { error, value } = insertionSchema.validate(transaction);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const newTransaction = new Transaction(value);
-  await newTransaction.save();
+  const newTransaction = await Transaction.create(value);
   await redisClient.deleteList('transactions');
   return newTransaction;
 };
@@ -60,7 +58,10 @@ const create = async (transaction) => {
 const getAll = async (filters, isArray = true) => {
   let transactions = await redisClient.getList('transactions');
   if (transactions.length === 0) {
-    transactions = await Transaction.find().lean();
+    transactions = await Transaction.findAll({
+      raw: true,
+      nest: true,
+    });
     await redisClient.setList('transactions', transactions);
   }
   if (filters) { transactions = filter(transactions, filters); }
@@ -71,28 +72,22 @@ const getAll = async (filters, isArray = true) => {
 };
 
 const get = async (id) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
-  }
-  const transaction = await getAll({ _id: id }, false);
+  const transaction = await getAll({ id }, false);
   if (!transaction) throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
   return transaction;
 };
 
 const update = async (id, payload) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = insertionSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const updatedValue = await Transaction.findByIdAndUpdate(id, value);
+  const updatedValue = await Transaction.update(value, { where: { id }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('transactions');
   return updatedValue;
 };
 
 const remove = async (id) => {
-  await Transaction.findByIdAndDelete(id);
+  await Transaction.destroy({ where: { id }, limit: 1 });
   await redisClient.deleteList('transactions');
 };
 
@@ -102,9 +97,9 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const creditAccount = await accountService.getAll({ iban: transaction.creditAccountIban }, false);
   if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
-  if (creditAccount._id.toString() === accountId) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
+  if (creditAccount.id == accountId) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
   if (transaction.gateway !== transactionGatewayEnum.DEPOSIT) {
-    const debitAccount = await accountService.getAll({ userId, _id: accountId }, false);
+    const debitAccount = await accountService.getAll({ userId, id: accountId }, false);
     if (!debitAccount) throw new APIError({ message: `Account with the following ID is not found ${transaction.debitAccount}`, status: httpStatus.CONFLICT });
     if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (debitAccount.userId.toString() !== userId || creditAccount.userId.toString() !== userId)) throw new APIError({ message: 'Cannot send money to someone else\'s saving account', status: httpStatus.CONFLICT });
     if (transaction.gateway === transactionGatewayEnum.TRANSFER) transaction.gatewayId = accountId;
@@ -114,11 +109,11 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
       if (!creditCard.isActive) throw new APIError({ message: 'Credit card  not active', status: httpStatus.CONFLICT });
       if (((creditCard.allowedLimit - creditCard.limitUsage) < transaction.amount)) { throw new APIError({ message: 'Reaching credit card limit', status: httpStatus.CONFLICT }); }
       if (!compareDate(creditCard.expirationDate, Date.now())) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
-      transaction.gatewayId = creditCard._id.toString();
+      transaction.gatewayId = creditCard.id;
     }
-    transaction = { ...transaction, creditAccount: creditAccount._id.toString(), currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
+    transaction = { ...transaction, creditAccount: creditAccount.id, currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
   } else {
-    transaction = { ...transaction, creditAccount: creditAccount._id.toString(), currencyExchange: `${creditAccount.currency}/${creditAccount.currency}` };
+    transaction = { ...transaction, creditAccount: creditAccount.id, currencyExchange: `${creditAccount.currency}/${creditAccount.currency}` };
   }
 
   delete transaction.creditAccountIban;
@@ -129,10 +124,7 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
 };
 
 const getUserTransaction = async ({ userId, transactionId }) => {
-  if (!ObjectId.isValid(userId) && !ObjectId.isValid(transactionId)) {
-    throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
-  }
-  const transaction = await getAll({ userId, _id: transactionId }, false);
+  const transaction = await getAll({ userId, id: transactionId }, false);
   if (!transaction) throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
   return transaction;
 };
