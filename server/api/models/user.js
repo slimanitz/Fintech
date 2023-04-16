@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
 // eslint-disable-next-line no-unused-vars
-const mongoClient = require('../../config/database');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../config/database');
 const { userRolesEnum } = require('../../utils/enums');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    isActive: { type: Boolean, default: true },
-    role: { type: String, enum: Object.values(userRolesEnum), default: userRolesEnum.CLIENT },
-
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true,
   },
-
-  { timestamps: true },
-  { versionKey: false },
-);
-
-userSchema.set('lean', true);
-const User = mongoose.model('user', userSchema);
+  name: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false, unique: true },
+  password: { type: DataTypes.STRING, allowNull: false },
+  isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+  role: { type: DataTypes.ENUM(Object.values(userRolesEnum)), defaultValue: userRolesEnum.CLIENT },
+}, {
+  timestamps: true,
+  underscored: true,
+});
 
 module.exports = User;
