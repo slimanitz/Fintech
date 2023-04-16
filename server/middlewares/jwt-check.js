@@ -20,7 +20,7 @@ const JWTCheck = (roles) => (req, res, next) => {
           return res.sendStatus(httpStatus.UNAUTHORIZED);
         }
         const { user } = payload;
-        const dbUser = await User.findById(user._id);
+        const dbUser = await User.findOne({ where: { id: user.id } });
 
         if (dbUser && roles.includes(dbUser.role)) {
           req.user = dbUser;
