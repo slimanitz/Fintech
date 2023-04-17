@@ -7,14 +7,13 @@ const User = require('./user');
 
 const Transaction = sequelize.define('Transaction', {
   id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
-  creditAccountId: { type: DataTypes.INTEGER, allowNull: false, references: { model: Account, key: 'id' } },
-  debitAccountId: { type: DataTypes.INTEGER, references: { model: Account, key: 'id' }, allowNull: true },
-  userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: User, key: 'id' } },
+  creditAccountId: { type: DataTypes.UUID, allowNull: false, references: { model: Account, key: 'id' } },
+  debitAccountId: { type: DataTypes.UUID, references: { model: Account, key: 'id' }, allowNull: true },
+  userId: { type: DataTypes.UUID, allowNull: false, references: { model: User, key: 'id' } },
   amount: { type: DataTypes.FLOAT, allowNull: false },
   status: {
     type:
@@ -22,7 +21,7 @@ const Transaction = sequelize.define('Transaction', {
     defaultValue: transactionStatusEnum.PENDING,
   },
   gateway: { type: DataTypes.ENUM(Object.values(transactionGatewayEnum)) },
-  gatewayId: { type: DataTypes.INTEGER, allowNull: true },
+  gatewayId: { type: DataTypes.UUID, allowNull: true },
   comment: { type: DataTypes.STRING, defaultValue: '' },
   currencyExchange: { type: DataTypes.STRING },
 }, {

@@ -5,12 +5,11 @@ const User = require('./user');
 
 const Account = sequelize.define('Account', {
   id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
-  userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: User, key: 'id' } },
+  userId: { type: DataTypes.UUID, allowNull: false, references: { model: User, key: 'id' } },
   iban: { type: DataTypes.STRING, unique: true },
   type: {
     type: DataTypes.ENUM(Object.values(accountTypesEnum)),

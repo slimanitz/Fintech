@@ -7,10 +7,9 @@ const User = require('./user');
 
 const Subscription = sequelize.define('subscription', {
   id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,
@@ -23,21 +22,21 @@ const Subscription = sequelize.define('subscription', {
     type: DataTypes.DOUBLE,
   },
   debitAccountId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     references: {
       model: Account,
       key: 'id',
     },
   },
   creditAccountId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     references: {
       model: Account,
       key: 'id',
     },
   },
   userId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     references: {
       model: User,
       key: 'id',
