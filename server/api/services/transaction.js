@@ -8,8 +8,8 @@ const { creditCardService } = require('./creditCard');
 const { accountService } = require('./account');
 
 const insertionSchema = Joi.object({
-  creditAccount: Joi.string().required(),
-  debitAccount: Joi.any(),
+  creditAccountId: Joi.string().required(),
+  debitAccountId: Joi.any(),
   amount: Joi.number().required(),
   status: Joi.string().valid(...Object.values(transactionStatusEnum)),
   gateway: Joi.string().valid(...Object.values(transactionGatewayEnum)).required(),
@@ -28,7 +28,7 @@ const insertionSchema = Joi.object({
 const createUserTransactionSchema = Joi.object({
   amount: Joi.number().required(),
   gateway: Joi.string().valid(...Object.values(transactionGatewayEnum)).required(),
-  debitAccount: Joi.alternatives().conditional('gateway', { is: transactionGatewayEnum.DEPOSIT, then: Joi.any(), otherwise: Joi.string().required() }),
+  debitAccountId: Joi.alternatives().conditional('gateway', { is: transactionGatewayEnum.DEPOSIT, then: Joi.any(), otherwise: Joi.string().required() }),
   creditAccountIban: Joi.string().required(),
   comment: Joi.string(),
   userId: Joi.string().required(),
@@ -92,16 +92,19 @@ const remove = async (id) => {
 };
 
 const createUserTransaction = async ({ userId, accountId }, payload) => {
-  let transaction = { ...payload, userId, debitAccount: accountId };
+  let transaction = { ...payload, userId, debitAccountId: accountId };
+  console.log('test1');
   const { error } = createUserTransactionSchema.validate(transaction);
-  if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
+  if (error) throw new APIError({ message: error, status: httpStatus.BAD_REQUEST });
+  console.log(error);
+
   const creditAccount = await accountService.getAll({ iban: transaction.creditAccountIban }, false);
   if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
   if (creditAccount.id == accountId) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
   if (transaction.gateway !== transactionGatewayEnum.DEPOSIT) {
     const debitAccount = await accountService.getAll({ userId, id: accountId }, false);
     if (!debitAccount) throw new APIError({ message: `Account with the following ID is not found ${transaction.debitAccount}`, status: httpStatus.CONFLICT });
-    if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (debitAccount.userId.toString() !== userId || creditAccount.userId.toString() !== userId)) throw new APIError({ message: 'Cannot send money to someone else\'s saving account', status: httpStatus.CONFLICT });
+    if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (debitAccount.userId !== userId || creditAccount.userId !== userId)) throw new APIError({ message: 'Cannot send money to someone else\'s saving account', status: httpStatus.CONFLICT });
     if (transaction.gateway === transactionGatewayEnum.TRANSFER) transaction.gatewayId = accountId;
     if (transaction.gateway === transactionGatewayEnum.CREDIT_CARD) {
       const creditCard = await creditCardService.getAll({ ...transaction.creditCardInfo }, false);
@@ -111,13 +114,14 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
       if (!compareDate(creditCard.expirationDate, Date.now())) { throw new APIError({ message: 'Credit Card expired', status: httpStatus.CONFLICT }); }
       transaction.gatewayId = creditCard.id;
     }
-    transaction = { ...transaction, creditAccount: creditAccount.id, currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
+    transaction = { ...transaction, creditAccountId: creditAccount.id, currencyExchange: `${debitAccount.currency}/${creditAccount.currency}` };
   } else {
-    transaction = { ...transaction, creditAccount: creditAccount.id, currencyExchange: `${creditAccount.currency}/${creditAccount.currency}` };
+    transaction = { ...transaction, creditAccountId: creditAccount.id, currencyExchange: `${creditAccount.currency}/${creditAccount.currency}` };
   }
 
   delete transaction.creditAccountIban;
   delete transaction.creditCardInfo;
+  console.log('Pass');
 
   transaction = await create(transaction);
   return transaction;
