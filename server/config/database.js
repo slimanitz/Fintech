@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('mysql://ecom:password@localhost:3306/ecom');
+const sequelize = new Sequelize('mysql://ecom:password@localhost:3306/ecom', { logging: false });
 
 const connect = async () => {
   try {
