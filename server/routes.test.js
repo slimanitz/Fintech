@@ -105,7 +105,7 @@ describe('Testing Client API Endpoints', () => {
       const res = await request(app).post(`/api/users/${user.id}/accounts`).set('Authorization', token).send({ type: accountTypesEnum.BASIC });
       account = res.body;
       expect(res.status).toEqual(200);
-      expect(res.body.balance).toEqual(0);
+      expect(res.body.balance).toEqual(20000);
     });
 
     describe('Authentication check on POST /api/users/:userId/accounts', () => {

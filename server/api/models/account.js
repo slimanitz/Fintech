@@ -15,7 +15,7 @@ const Account = sequelize.define('Account', {
     type: DataTypes.ENUM(Object.values(accountTypesEnum)),
     defaultValue: accountTypesEnum.BASIC,
   },
-  balance: { type: DataTypes.FLOAT, defaultValue: 0 },
+  balance: { type: DataTypes.FLOAT, defaultValue: 20000 },
   isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
   currency: { type: DataTypes.STRING, allowNull: false },
 }, {
