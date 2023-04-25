@@ -2,12 +2,12 @@
 
 const Piscina = require('piscina');
 const { resolve } = require('path');
-const connect = require('../../config/database');
+const { connect } = require('../../config/database');
 const User = require('../../api/models/user');
 const Account = require('../../api/models/account');
 const { userRolesEnum } = require('../../utils/enums');
 
-const NUMBER_OF_THREADS = 8;
+const NUMBER_OF_THREADS = 7;
 // Read all JSON file contents into an array
 
 function chunkArray(array, chunks) {
@@ -27,9 +27,17 @@ const main = async () => {
 
   const pool = new Piscina({ filename: resolve(__dirname, 'worker.js') });
   await connect();
-  const users = await User.find({ role: userRolesEnum.CLIENT }).limit(1000);
-  const random = Math.floor(Math.random() * 300);
-  const accounts = await Account.find().skip(random).limit(50);
+  const users = await User.findAll({
+    where: { role: userRolesEnum.CLIENT, isActive: true },
+    limit: 20,
+    raw: true,
+    nest: true,
+  });
+  // const random = Math.floor(Math.random() * 40);
+  const accounts = await Account.findAll({
+    raw: true,
+    nest: true,
+  });
   const threads = [];
 
   const chunks = chunkArray(users, NUMBER_OF_THREADS);

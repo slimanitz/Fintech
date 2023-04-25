@@ -26,8 +26,8 @@ const simulation = async ({ email, password }, accounts) => {
     const user = loginResponse.data;
 
     // STEP Create account and make transactions
-    // const accountsResponse = await instance.get(`/users/${user._id}/accounts`);
-    const accountResponse = await instance.post(`/users/${user._id}/accounts`, { type: accountTypesEnum.BASIC });
+    // const accountsResponse = await instance.get(`/users/${user.id}/accounts`);
+    const accountResponse = await instance.post(`/users/${user.id}/accounts`, { type: accountTypesEnum.BASIC });
     totalRequests++;
     if (accountResponse.status === 200) requestSuccess++;
 
@@ -36,6 +36,8 @@ const simulation = async ({ email, password }, accounts) => {
     // STEP3 Make 4  random transactions with bank accounts
 
     for (let index = 0; index < 4; index += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -45,16 +47,18 @@ const simulation = async ({ email, password }, accounts) => {
         comment: 'Test transaction ',
       };
 
-      const res = await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      const res = await instance.post(`/users/${user.id}/accounts/${account.id}/transactions`, payload);
       totalRequests++;
       if (res.status === 200) requestSuccess++;
     }
 
-    const creditCard = await instance.post(`/users/${user._id}/accounts/${account._id}/credit-cards`);
+    const creditCard = await instance.post(`/users/${user.id}/accounts/${account.id}/credit-cards`);
 
     // STEP4 make 4 random transactions with credit card
 
     for (let index = 0; index < 4; index += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -69,7 +73,7 @@ const simulation = async ({ email, password }, accounts) => {
         comment: 'Test transaction ',
       };
 
-      const res = await instance.post(`/users/${user._id}/accounts/${account._id}/transactions`, payload);
+      const res = await instance.post(`/users/${user.id}/accounts/${account.id}/transactions`, payload);
       totalRequests++;
       if (res.status === 200) requestSuccess++;
     }
@@ -77,6 +81,8 @@ const simulation = async ({ email, password }, accounts) => {
     // STEP5 CREATE SUBSCRIPTION
 
     for (let index = 0; index < 2; index += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -87,14 +93,14 @@ const simulation = async ({ email, password }, accounts) => {
         finishDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       };
 
-      const res = await instance.post(`/users/${user._id}/accounts/${account._id}/subscriptions`, payload);
+      const res = await instance.post(`/users/${user.id}/accounts/${account.id}/subscriptions`, payload);
       totalRequests++;
       if (res.status === 200) requestSuccess++;
     }
 
     const end = Date.now();
 
-    return { delay: end - start, success: `${requestSuccess}/${totalRequests}` };
+    return { delay: end - start, success: requestSuccess, rate: requestSuccess / totalRequests };
   } catch (e) {
     console.log('====================================');
     console.log(e.message);
