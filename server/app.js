@@ -9,7 +9,7 @@ app.listen(8080, async () => {
   // await sequelize.sync({ force: true });
   console.log(redisClient.status);
   console.log(`The server is running on ${host}`);
-  // transactionCron.start();
+  transactionCron.start();
 });
 
 module.exports = app;
