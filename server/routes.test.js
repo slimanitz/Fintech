@@ -359,7 +359,7 @@ describe('Testing Client API Endpoints', () => {
       test('should return All users transactions  ', async () => {
         const res = await request(app).get(`/api/users/${user.id}/transactions`).set('Authorization', token);
         expect(res.status).toEqual(200);
-        expect(res.body).arrayContaining(transaction);
+        expect(res.body.some(({ id }) => id === transaction.id)).toBe(true);
       });
     });
 
@@ -410,7 +410,7 @@ describe('Testing Client API Endpoints', () => {
       test('should return All users subscriptions  ', async () => {
         const res = await request(app).get(`/api/users/${user.id}/subscriptions`).set('Authorization', token);
         expect(res.status).toEqual(200);
-        expect(res.body).arrayContaining(subscription.id);
+        expect(res.body.some(({ id }) => id === subscription.id)).toBe(true);
       });
     });
 
