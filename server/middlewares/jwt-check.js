@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const jwt = require('jsonwebtoken');
 const httpStatus = require('http-status');
-const User = require('../api/models/user');
 const { jwtSecret } = require('../config/vars');
 const APIError = require('../utils/api-error');
 
