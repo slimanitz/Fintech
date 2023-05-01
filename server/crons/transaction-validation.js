@@ -100,15 +100,11 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
 
         try {
           creditCard.limitUsage += transaction.amount;
-          console.log('====================================');
-          console.log('BAL', creditCard.limitUsage);
-          console.log('====================================');
           await CreditCard.update(
             { limitUsage: creditCard.limitUsage },
             { where: { id: creditCard.id }, transaction: t },
           );
           creditAccount.balance += transaction.amount;
-          console.log('BAL', creditAccount.balance);
           await Account.update(
             { balance: creditAccount.balance },
             { where: { id: creditAccount.id }, transaction: t },
@@ -164,7 +160,6 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
           await t.commit();
           return true;
         } catch (error) {
-          console.log('error');
           console.log(error);
           await t.rollback();
           await Transaction.update(
@@ -175,12 +170,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
         }
       }
     } catch (error) {
-      console.log('====================================');
       console.log(error);
-      console.log('====================================');
-      console.log('====================================');
-      console.log('refused');
-      console.log('====================================');
       await Transaction.update(
         { status: transactionStatusEnum.REFUSED },
         { where: { id: transaction.id } },
@@ -189,10 +179,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
     }
   }));
 
-  console.log('====================================');
   console.log(results);
-  console.log('====================================');
-  console.log('running a task every 3 seconds');
 
   fs.appendFileSync('data.csv', `${results.join('", "')}`);
 });
