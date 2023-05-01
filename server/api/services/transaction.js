@@ -93,11 +93,8 @@ const remove = async (id) => {
 
 const createUserTransaction = async ({ userId, accountId }, payload) => {
   let transaction = { ...payload, userId, debitAccountId: accountId };
-  console.log('test1');
   const { error } = createUserTransactionSchema.validate(transaction);
   if (error) throw new APIError({ message: error, status: httpStatus.BAD_REQUEST });
-  console.log(error);
-
   const creditAccount = await accountService.getAll({ iban: transaction.creditAccountIban }, false);
   if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${transaction.creditAccountIban}`, status: httpStatus.CONFLICT });
   if (creditAccount.id == accountId) throw new APIError({ message: 'Cannot send money to the same account', status: httpStatus.CONFLICT });
@@ -121,8 +118,6 @@ const createUserTransaction = async ({ userId, accountId }, payload) => {
 
   delete transaction.creditAccountIban;
   delete transaction.creditCardInfo;
-  console.log('Pass');
-
   transaction = await create(transaction);
   return transaction;
 };
