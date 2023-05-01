@@ -43,7 +43,7 @@ const main = async () => {
       type: Object
         .values(accountTypesEnum)[Math.floor(Math.random() * Object
           .values(accountTypesEnum).length)],
-      balance: faker.finance.amount(0, 30000),
+      balance: faker.finance.amount(0, 5000),
       isActive: Math.random() < 0.5,
       iban: faker.finance.iban(),
       currency: 'EUR',
