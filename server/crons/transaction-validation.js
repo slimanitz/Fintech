@@ -1,12 +1,13 @@
 const cron = require('node-cron');
+const fs = require('fs');
 const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
 const { connect, sequelize } = require('../config/database');
 const Transaction = require('../api/models/transaction');
 const Account = require('../api/models/account');
 const CreditCard = require('../api/models/creditCard');
 
-const transactionCron = cron.schedule('*/10 * * * * *', async () => {
-  await connect();
+const transactionCron = cron.schedule('*/3 * * * * *', async () => {
+  // await connect();
   const transactions = await Transaction
     .findAll({
       where: {
@@ -23,6 +24,7 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
   console.log('====================================');
 
   const results = await Promise.all(transactions.map(async (transaction) => {
+    console.count('arrived');
     try {
       const debitAccount = await Account.findByPk(transaction.debitAccountId);
       if (!debitAccount && transactionGatewayEnum.DEPOSIT) {
@@ -30,7 +32,7 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
           { status: transactionStatusEnum.REFUSED },
           { where: { id: transaction.id } },
         );
-        console.log('1');
+        console.log('step 1');
         return false;
       }
       const creditAccount = await Account.findByPk(transaction.creditAccountId);
@@ -39,15 +41,18 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
           { status: transactionStatusEnum.REFUSED },
           { where: { id: transaction.id } },
         );
-        console.log('2');
+        console.log('step 2');
         return false;
       }
       if (transaction.gateway == transactionGatewayEnum.DEPOSIT) {
         const t = await sequelize.transaction();
 
         try {
-          creditAccount.balance += transaction.amount;
-          await creditAccount.save({ transaction: t });
+          creditAccount.balance += +transaction.amount;
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
           await Transaction.update(
             { status: transactionStatusEnum.APPROVED },
             { where: { id: transaction.id }, transaction: t },
@@ -72,7 +77,7 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('3');
+          console.log('step 3');
           return false;
         }
         if (((creditCard.allowedLimit - creditCard.limitUsage) < transaction.amount)) {
@@ -80,7 +85,7 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('4');
+          console.log('step 4');
           return false;
         }
         if (debitAccount.balance < transaction.amount) {
@@ -88,24 +93,38 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('5');
+          console.log('step 5');
           return false;
         }
         const t = await sequelize.transaction();
 
         try {
           creditCard.limitUsage += transaction.amount;
-          await creditCard.save({ transacation: t });
+          console.log('====================================');
+          console.log('BAL', creditCard.limitUsage);
+          console.log('====================================');
+          await CreditCard.update(
+            { limitUsage: creditCard.limitUsage },
+            { where: { id: creditCard.id }, transaction: t },
+          );
           creditAccount.balance += transaction.amount;
-          await creditAccount.save({ transacation: t });
+          console.log('BAL', creditAccount.balance);
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
           debitAccount.balance -= transaction.amount;
-          await debitAccount.save({ transacation: t });
+          await Account.update(
+            { balance: debitAccount.balance },
+            { where: { id: debitAccount.id }, transaction: t },
+          );
           await Transaction.update(
             { status: transactionStatusEnum.APPROVED },
             { where: { id: transaction.id }, transaction: t },
           );
           await t.commit();
-          console.log('success');
+          console.log('success235');
+          return true;
         } catch (error) {
           console.log('error');
           console.log(error);
@@ -129,15 +148,21 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
 
         try {
           creditAccount.balance += transaction.amount;
-          await creditAccount.save({ transaction: t });
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
           debitAccount.balance -= transaction.amount;
-          await debitAccount.save({ transaction: t });
-
+          await Account.update(
+            { balance: debitAccount.balance },
+            { where: { id: debitAccount.id }, transaction: t },
+          );
           await Transaction.update(
             { status: transactionStatusEnum.APPROVED },
-            { where: { id: transaction.id } },
+            { where: { id: transaction.id }, transaction: t },
           );
           await t.commit();
+          return true;
         } catch (error) {
           console.log('error');
           console.log(error);
@@ -168,6 +193,8 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
   console.log(results);
   console.log('====================================');
   console.log('running a task every 3 seconds');
+
+  fs.appendFileSync('data.csv', `${results.join('", "')}`);
 });
 
 module.exports = transactionCron;
