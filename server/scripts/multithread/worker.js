@@ -41,7 +41,7 @@ const simulation = async ({ email, password }, accounts) => {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
-        amount: 2000,
+        amount: Math.floor(Math.random() * 2000),
         gateway: transactionGatewayEnum.TRANSFER,
         creditAccountIban: creditAcccount.iban,
         comment: 'Test transaction ',
@@ -62,7 +62,7 @@ const simulation = async ({ email, password }, accounts) => {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
-        amount: 2000,
+        amount: Math.floor(Math.random() * 2000),
         gateway: transactionGatewayEnum.CREDIT_CARD,
         creditAccountIban: creditAcccount.iban,
         creditCardInfo: {
@@ -86,7 +86,7 @@ const simulation = async ({ email, password }, accounts) => {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
-        amount: 2000,
+        amount: Math.floor(Math.random() * 2000),
         creditAccountIban: creditAcccount.iban,
         name: 'Test Subscription ',
         frequency: subscriptionFrequency.DAILY,
