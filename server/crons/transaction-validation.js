@@ -25,7 +25,7 @@ const getConversionResult = async (currencyPair, amount) => {
   return response.data.conversion_result;
 };
 
-const transactionCron = cron.schedule('*/3 * * * * *', async () => {
+const transactionCron = cron.schedule('*/30 * * * * *', async () => {
   // await connect();
   const transactions = await Transaction
     .findAll({
@@ -38,9 +38,6 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
       limit: 10,
     });
   //   const t = await sequelize.transaction();
-  console.log('====================================');
-  console.log(transactions);
-  console.log('====================================');
 
   const results = await Promise.all(transactions.map(async (transaction) => {
     console.count('arrived');
@@ -81,11 +78,8 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
             { where: { id: transaction.id }, transaction: t },
           );
           await t.commit();
-          console.log('success');
           return true;
         } catch (error) {
-          console.log('error');
-          console.log(error);
           await t.rollback();
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
@@ -143,11 +137,8 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
             { where: { id: transaction.id }, transaction: t },
           );
           await t.commit();
-          console.log('success235');
           return true;
         } catch (error) {
-          console.log('error');
-          console.log(error);
           await t.rollback();
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
@@ -184,7 +175,6 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
           await t.commit();
           return true;
         } catch (error) {
-          console.log(error);
           await t.rollback();
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
@@ -202,8 +192,6 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
       return false;
     }
   }));
-
-  console.log(results);
 
   fs.appendFileSync('data.csv', `${results.join('", "')}`);
 });

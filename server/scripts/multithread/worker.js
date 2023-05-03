@@ -18,7 +18,6 @@ const simulation = async ({ email, password }, accounts) => {
     });
 
     // Step 1 Login
-    console.log('LOGIN', email);
     const loginResponse = await instance.post('/users/login', { email: email.toLowerCase(), password: 'password' });
     totalRequests++;
     if (loginResponse.status !== 200) requestSuccess++;
@@ -102,9 +101,6 @@ const simulation = async ({ email, password }, accounts) => {
 
     return { delay: end - start, success: requestSuccess, rate: requestSuccess / totalRequests };
   } catch (e) {
-    console.log('====================================');
-    console.log(e.message);
-    console.log('======================w==============');
     return { delay: 0, success: `${requestSuccess}/${totalRequests}` };
   }
 };
