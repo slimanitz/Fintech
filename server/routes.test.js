@@ -1,5 +1,6 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
+const moment = require('moment');
 const app = require('./config/server');
 const { connect, sequelize } = require('./config/database');
 const { transactionGatewayEnum, accountTypesEnum, subscriptionFrequency } = require('./utils/enums');
@@ -390,7 +391,9 @@ describe('Testing Client API Endpoints', () => {
           creditAccountIban: creditAccount.iban,
           name: 'Test Subscription ',
           frequency: subscriptionFrequency.MONTHLY,
-          finishDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+          finishDate: moment().add(1, 'years').toDate(),
+          currency: 'EUR',
+
         };
 
         const res = await request(app).post(`/api/users/${user.id}/accounts/${account.id}/subscriptions`).set('Authorization', token).send(payload);

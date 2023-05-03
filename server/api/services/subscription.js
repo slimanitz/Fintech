@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const Subscription = require('../models/subscription');
 const APIError = require('../../utils/api-error');
@@ -16,6 +15,7 @@ const schema = Joi.object({
   userId: Joi.string().required(),
   frequency: Joi.string().required(),
   finishDate: Joi.date().required(),
+  currency: Joi.string().required(),
 
 });
 
@@ -27,6 +27,7 @@ const createUserSubscriptionSchema = Joi.object({
   userId: Joi.string().required(),
   frequency: Joi.string().valid(...Object.values(subscriptionFrequency)).required(),
   finishDate: Joi.date().required(),
+  currency: Joi.string().required(),
 
 });
 
