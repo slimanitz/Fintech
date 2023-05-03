@@ -11,8 +11,8 @@ const schema = Joi.object({
   name: Joi.string().required(),
   type: Joi.string().required(),
   amount: Joi.number().required(),
-  debitAccount: Joi.string().required(),
-  creditAccount: Joi.string().required(),
+  debitAccountId: Joi.string().required(),
+  creditAccountId: Joi.string().required(),
   userId: Joi.string().required(),
   frequency: Joi.string().required(),
   finishDate: Joi.date().required(),
@@ -22,7 +22,7 @@ const schema = Joi.object({
 const createUserSubscriptionSchema = Joi.object({
   name: Joi.string().required(),
   amount: Joi.number().required(),
-  debitAccount: Joi.string().required(),
+  debitAccountId: Joi.string().required(),
   creditAccountIban: Joi.string().required(),
   userId: Joi.string().required(),
   frequency: Joi.string().valid(...Object.values(subscriptionFrequency)).required(),
@@ -86,20 +86,20 @@ const remove = async (id) => {
 };
 
 const createUserSubscription = async ({ userId, accountId }, payload) => {
-  let subscription = { ...payload, userId, debitAccount: accountId };
+  let subscription = { ...payload, userId, debitAccountId: accountId };
   const { error } = createUserSubscriptionSchema.validate(subscription);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const creditAccount = await accountService
     .getAll({ iban: subscription.creditAccountIban }, false);
   if (!creditAccount) throw new APIError({ message: `Account with the following IBAN is not found ${subscription.creditAccountIban}`, status: httpStatus.CONFLICT });
-  if (creditAccount.id == accountId) throw new APIError({ message: 'Cannot smake subscription to the same account', status: httpStatus.CONFLICT });
+  if (creditAccount.id == accountId) throw new APIError({ message: 'Cannot make a subscription to the same account', status: httpStatus.CONFLICT });
   const debitAccount = await accountService.getAll({ userId, id: accountId }, false);
   if (!debitAccount) throw new APIError({ message: `Account with the following ID is not found ${subscription.debitAccount}`, status: httpStatus.CONFLICT });
   if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (debitAccount.userId.toString() !== userId || creditAccount.userId.toString() !== userId)) throw new APIError({ message: 'Cannot make subscription to someone else s saving account', status: httpStatus.CONFLICT });
 
   subscription = {
     ...subscription,
-    creditAccount: creditAccount.id,
+    creditAccountId: creditAccount.id,
     type: subscriptionTypes.DEBIT,
   };
 
