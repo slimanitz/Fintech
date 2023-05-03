@@ -1,10 +1,29 @@
 const cron = require('node-cron');
 const fs = require('fs');
+const axios = require('axios');
 const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
 const { connect, sequelize } = require('../config/database');
 const Transaction = require('../api/models/transaction');
 const Account = require('../api/models/account');
 const CreditCard = require('../api/models/creditCard');
+const { exchangeApiKey } = require('../config/vars');
+
+const exchangeInstance = axios.create({
+  baseURL: `https://v6.exchangerate-api.com/v6/${exchangeApiKey}/pair`,
+  timeout: 1000,
+  validateStatus: () => true,
+
+});
+
+const isTheSameCurrency = (exchangeCurrency) => {
+  const currencies = exchangeCurrency.split('/');
+  return currencies[0] === currencies[1];
+};
+
+const getConversionResult = async (currencyPair, amount) => {
+  const response = await exchangeApiKey.get(`/${currencyPair}/${amount}`);
+  return response.data.conversion_result;
+};
 
 const transactionCron = cron.schedule('*/3 * * * * *', async () => {
   // await connect();
@@ -25,6 +44,10 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
 
   const results = await Promise.all(transactions.map(async (transaction) => {
     console.count('arrived');
+    const amount = isTheSameCurrency(transaction.currencyExchange)
+      ? transaction.amount
+      : await getConversionResult(transaction.currencyExchange);
+
     try {
       const debitAccount = await Account.findByPk(transaction.debitAccountId);
       if (!debitAccount && transactionGatewayEnum.DEPOSIT) {
@@ -48,7 +71,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
         const t = await sequelize.transaction();
 
         try {
-          creditAccount.balance += +transaction.amount;
+          creditAccount.balance += amount;
           await Account.update(
             { balance: creditAccount.balance },
             { where: { id: creditAccount.id }, transaction: t },
@@ -80,7 +103,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
           console.log('step 3');
           return false;
         }
-        if (((creditCard.allowedLimit - creditCard.limitUsage) < transaction.amount)) {
+        if (((creditCard.allowedLimit - creditCard.limitUsage) < amount)) {
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
@@ -88,7 +111,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
           console.log('step 4');
           return false;
         }
-        if (debitAccount.balance < transaction.amount) {
+        if (debitAccount.balance < amount) {
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
@@ -99,7 +122,8 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
         const t = await sequelize.transaction();
 
         try {
-          creditCard.limitUsage += transaction.amount;
+          creditCard.limitUsage += amount;
+
           await CreditCard.update(
             { limitUsage: creditCard.limitUsage },
             { where: { id: creditCard.id }, transaction: t },
@@ -109,7 +133,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
             { balance: creditAccount.balance },
             { where: { id: creditAccount.id }, transaction: t },
           );
-          debitAccount.balance -= transaction.amount;
+          debitAccount.balance -= amount;
           await Account.update(
             { balance: debitAccount.balance },
             { where: { id: debitAccount.id }, transaction: t },
@@ -132,7 +156,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
           return false;
         }
       } else {
-        if (debitAccount.balance < transaction.amount) {
+        if (debitAccount.balance < amount) {
           await Transaction.update(
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
@@ -148,7 +172,7 @@ const transactionCron = cron.schedule('*/3 * * * * *', async () => {
             { balance: creditAccount.balance },
             { where: { id: creditAccount.id }, transaction: t },
           );
-          debitAccount.balance -= transaction.amount;
+          debitAccount.balance -= amount;
           await Account.update(
             { balance: debitAccount.balance },
             { where: { id: debitAccount.id }, transaction: t },
