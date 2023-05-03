@@ -54,6 +54,12 @@ const Subscription = sequelize.define('subscription', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  currency: {
+    type: DataTypes.STRING,
+  },
+  lastTransaction: {
+    type: DataTypes.DATE,
+  },
 }, {
   timestamps: true,
   version: false,

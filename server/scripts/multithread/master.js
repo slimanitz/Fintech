@@ -29,14 +29,16 @@ const main = async () => {
   await connect();
   const users = await User.findAll({
     where: { role: userRolesEnum.CLIENT, isActive: true },
-    limit: 20,
+    limit: 1,
     raw: true,
     nest: true,
   });
-  // const random = Math.floor(Math.random() * 40);
+  const random = Math.floor(Math.random() * 200);
   const accounts = await Account.findAll({
     raw: true,
     nest: true,
+    limit: 30,
+    skip: random,
   });
   const threads = [];
 

@@ -1,8 +1,11 @@
 /* worker-pool.js */
 
 const axios = require('axios');
+const moment = require('moment');
 const { host } = require('../../config/vars');
-const { transactionGatewayEnum, accountTypesEnum, subscriptionFrequency } = require('../../utils/enums');
+const {
+  transactionGatewayEnum, accountTypesEnum, subscriptionFrequency, ibanToCurrencies,
+} = require('../../utils/enums');
 
 let requestSuccess = 0;
 let totalRequests = 0;
@@ -89,7 +92,8 @@ const simulation = async ({ email, password }, accounts) => {
         creditAccountIban: creditAcccount.iban,
         name: 'Test Subscription ',
         frequency: subscriptionFrequency.DAILY,
-        finishDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+        finishDate: moment().add(2, 'years'),
+        currency: 'EUR',
       };
 
       const res = await instance.post(`/users/${user.id}/accounts/${account.id}/subscriptions`, payload);
