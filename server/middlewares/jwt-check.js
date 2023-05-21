@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const jwt = require('jsonwebtoken');
 const httpStatus = require('http-status');
-const User = require('../api/models/user');
 const { jwtSecret } = require('../config/vars');
 const APIError = require('../utils/api-error');
 
@@ -20,10 +19,8 @@ const JWTCheck = (roles) => (req, res, next) => {
           return res.sendStatus(httpStatus.UNAUTHORIZED);
         }
         const { user } = payload;
-        const dbUser = await User.findById(user._id);
-
-        if (dbUser && roles.includes(dbUser.role)) {
-          req.user = dbUser;
+        if (roles.includes(user.role)) {
+          req.user = user;
           return next();
         }
         res.sendStatus(httpStatus.UNAUTHORIZED);

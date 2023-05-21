@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { ObjectId } = require('mongoose').Types;
 const Joi = require('joi');
 const { faker } = require('@faker-js/faker');
 const Account = require('../models/account');
@@ -33,8 +32,7 @@ function filter(arr, criteria) {
 const create = async (account) => {
   const { error, value } = schema.validate(account);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const newAccount = new Account(value);
-  await newAccount.save();
+  const newAccount = await Account.create(value);
   await redisClient.deleteList('accounts');
   return newAccount;
 };
@@ -42,7 +40,10 @@ const create = async (account) => {
 const getAll = async (filters, isArray = true) => {
   let accounts = await redisClient.getList('accounts');
   if (accounts.length === 0) {
-    accounts = await Account.find().lean();
+    accounts = await Account.findAll({
+      raw: true,
+      nest: true,
+    });
     await redisClient.setList('accounts', accounts);
   }
   if (filters) accounts = filter(accounts, filters);
@@ -53,35 +54,26 @@ const getAll = async (filters, isArray = true) => {
 };
 
 const get = async (id) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
-  }
-  const account = await getAll({ _id: id }, false);
+  const account = await getAll({ id }, false);
   if (!account) throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
   return account;
 };
 
 const update = async (id, payload) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = schema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const updatedValue = await Account.findByIdAndUpdate(id, value);
+  const updatedValue = await Account.update(value, { where: { id }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('accounts');
   return updatedValue;
 };
 
 const remove = async (id) => {
-  await Account.findByIdAndDelete(id);
+  await Account.destroy({ where: { id }, limit: 1 });
   await redisClient.deleteList('accounts');
 };
 
 const createUserAccount = async ({ userId }, payload) => {
-  if (!ObjectId.isValid(userId)) {
-    throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-  }
   const { error } = userCreateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   let account = { ...payload, userId, type: payload.type || accountTypesEnum.BASIC };
@@ -93,29 +85,20 @@ const createUserAccount = async ({ userId }, payload) => {
 };
 
 const getAllUserAccounts = async ({ userId }) => {
-  if (!ObjectId.isValid(userId)) {
-    throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
-  }
   const accounts = await getAll({ userId });
   return accounts;
 };
 
 const getUserAccount = async ({ userId, accountId }) => {
-  if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
-    throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
-  }
-  const accounts = await getAll({ userId, _id: accountId }, false);
+  const accounts = await getAll({ userId, id: accountId }, false);
   return accounts;
 };
 
 const updateUserAccount = async ({ userId, accountId }, payload) => {
-  if (!ObjectId.isValid(userId) || !ObjectId.isValid(accountId)) {
-    throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = userUpdateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await Account
-    .findOneAndUpdate({ _id: accountId, userId }, { $set: value }, { new: true });
+    .update(value, { where: { id: accountId, userId }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No account found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('accounts');
   return updatedValue;

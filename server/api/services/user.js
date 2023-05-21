@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { ObjectId } = require('mongoose').Types;
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
@@ -31,16 +30,19 @@ const create = async (user) => {
   const { error, value } = schema.validate(user);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   value.password = crypto.createHash('sha1').update(value.password, 'binary').digest('hex');
-  const newUser = new User(value);
-  await newUser.save();
+  const newUser = await User.create(value);
   await redisClient.deleteList('users');
   return newUser;
 };
 
 const getAll = async (filters, isArray = true) => {
   let users = await redisClient.getList('users');
+
   if (users.length === 0) {
-    users = await User.find();
+    users = await User.findAll({
+      raw: true,
+      nest: true,
+    });
     await redisClient.setList('users', users);
   }
   if (filters) { users = filter(users, filters); }
@@ -50,10 +52,7 @@ const getAll = async (filters, isArray = true) => {
 };
 
 const get = async (id) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-  }
-  const user = await getAll({ _id: id }, false);
+  const user = await getAll({ id }, false);
   if (!user) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   return user;
 };
@@ -68,20 +67,16 @@ const login = async ({ email, password }) => {
 };
 
 const update = async (id, payload) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = updateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const updatedValue = await User.findOneAndUpdate({ _id: id }, { $set: value }, { new: true });
-
+  const updatedValue = await User.update(value, { where: { id }, plain: true, returning: true });
   if (!updatedValue) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('users');
   return updatedValue;
 };
 
 const remove = async (id) => {
-  await User.findByIdAndDelete(id);
+  await User.destroy({ where: { id } });
   await redisClient.deleteList('users');
 };
 

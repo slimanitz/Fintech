@@ -36,8 +36,7 @@ function filter(arr, criteria) {
 const create = async (creditCard) => {
   const { error, value } = schema.validate(creditCard);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const newCreditCard = new CreditCard(value);
-  await newCreditCard.save();
+  const newCreditCard = await CreditCard.create(value);
   await redisClient.deleteList('creditCards');
   return newCreditCard;
 };
@@ -45,7 +44,10 @@ const create = async (creditCard) => {
 const getAll = async (filters, isArray = true) => {
   let creditCards = await redisClient.getList('creditCards');
   if (creditCards.length === 0) {
-    creditCards = await CreditCard.find().lean();
+    creditCards = await CreditCard.findAll({
+      raw: true,
+      nest: true,
+    });
     await redisClient.setList('creditCards', creditCards);
   }
   if (filters) creditCards = filter(creditCards, filters);
@@ -56,39 +58,29 @@ const getAll = async (filters, isArray = true) => {
 };
 
 const get = async (id) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No creditCard found', status: httpStatus.NOT_FOUND });
-  }
-  const user = await getAll({ _id: id }, false);
+  const user = await getAll({ id }, false);
   if (!user) throw new APIError({ message: 'No creditCard found', status: httpStatus.NOT_FOUND });
   return user;
 };
 
 const update = async (id, payload) => {
-  if (!ObjectId.isValid(id)) {
-    throw new APIError({ message: 'No creditCard found', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = schema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const updatedValue = await CreditCard.findByIdAndUpdate(id, value);
+  const updatedValue = await CreditCard.update(value, { where: { id }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No creditCard found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('creditCards');
   return updatedValue;
 };
 
 const remove = async (id) => {
-  await CreditCard.findByIdAndDelete(id);
+  await CreditCard.destroy({ where: { id } });
   await redisClient.deleteList('creditCards');
 };
 
 const createUserAccountCreditCard = async ({ userId, accountId }) => {
-  if (!ObjectId.isValid(accountId) || !ObjectId.isValid(userId)) {
-    throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = userCreationSchema.validate({ userId, accountId });
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-
-  const account = await accountService.getAll({ userId, _id: accountId }, false);
+  const account = await accountService.getAll({ userId, id: accountId }, false);
   if (!account) throw new APIError({ message: `Account with given id ${accountId} IS NOT FOUND !`, status: httpStatus.NOT_FOUND });
   if (account.type == accountTypesEnum.SAVING) throw new APIError({ message: 'Cannot create credit card for saving account', status: httpStatus.CONFLICT });
   value.number = faker.finance.creditCardNumber().replaceAll('-', '');
@@ -104,29 +96,20 @@ const createUserAccountCreditCard = async ({ userId, accountId }) => {
 };
 
 const getAllUsersCreditCards = async ({ userId }) => {
-  if (!ObjectId.isValid(userId)) {
-    throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
-  }
   const creditCards = await getAll({ userId });
   return creditCards;
 };
 
 const getUserCreditCard = async ({ userId, creditCardId }) => {
-  if (!ObjectId.isValid(userId) || !ObjectId.isValid(creditCardId)) {
-    throw new APIError({ message: 'Invalid ID', status: httpStatus.NOT_FOUND });
-  }
-  const creditCard = await getAll({ _id: creditCardId, userId }, false);
+  const creditCard = await getAll({ id: creditCardId, userId }, false);
   return creditCard;
 };
 
 const updateUserCreditCard = async ({ userId, creditCardId }, payload) => {
-  if (!ObjectId.isValid(userId) || !ObjectId.isValid(creditCardId)) {
-    throw new APIError({ message: 'Invalid IDs', status: httpStatus.NOT_FOUND });
-  }
   const { error, value } = updateSchema.validate(payload);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await CreditCard
-    .findOneAndUpdate({ _id: creditCardId, userId }, { $set: value }, { new: true });
+    .update(value, { where: { id: creditCardId, userId }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No Credit card found found', status: httpStatus.NOT_FOUND });
   await redisClient.deleteList('creditCards');
   return updatedValue;

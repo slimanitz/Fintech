@@ -1,168 +1,199 @@
-// const cron = require('node-cron');
-// const { default: mongoose } = require('mongoose');
-// const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
-// const { creditCardService } = require('../api/services/creditCard');
-// const { transactionService } = require('../api/services/transaction');
-// const connect = require('../config/database');
-// const { accountService } = require('../api/services/account');
-// const Transaction = require('../api/models/transaction');
-// const Account = require('../api/models/account');
-// const CreditCard = require('../api/models/creditCard');
+const cron = require('node-cron');
+const fs = require('fs');
+const axios = require('axios');
+const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
+const { connect, sequelize } = require('../config/database');
+const Transaction = require('../api/models/transaction');
+const Account = require('../api/models/account');
+const CreditCard = require('../api/models/creditCard');
+const { exchangeApiKey } = require('../config/vars');
 
-// const transactionCron = cron.schedule('*/5 * * * * *', async () => {
-//   await connect();
-//   const conn = mongoose.connection;
-//   const transactions = await transactionService.getAll({ status: transactionStatusEnum.PENDING });
-//   const updates = Promise.all(transactions.map(async (transaction) => {
-//     try {
-//       const debitAccount = await Account.findById(transaction.debitAccount);
-//       if (!debitAccount && transactionGatewayEnum.DEPOSIT) {
-//         return {
-//           updateOne: {
-//             filter: { _id: transaction._id },
-//             update: { status: transactionStatusEnum.REFUSED },
-//           },
-//         };
-//       }
-//       const creditAccount = await Account.findById(transaction.creditAccount);
-//       if (!creditAccount) {
-//         return {
-//           updateOne: {
-//             filter: { _id: transaction._id },
-//             update: { status: transactionStatusEnum.REFUSED },
-//           },
-//         };
-//       }
-//       if (transaction.gateway == transactionGatewayEnum.DEPOSIT) {
-//         const session = await conn.startSession();
-//         try {
-//           session.startTransaction();
-//           creditAccount.balance += transaction.amount;
-//           await Account(creditAccount).save({ session });
-//           await session.commitTransaction();
-//           session.endSession();
-//           console.log('success');
-//           return { _id: transaction._id, status: transactionStatusEnum.APPROVED };
-//         } catch (error) {
-//           console.log('error');
-//           console.log(error);
-//           await session.abortTransaction();
-//           session.endSession();
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//       } else if (transaction.gateway == transactionGatewayEnum.CREDIT_CARD) {
-//         const creditCard = await CreditCard.findById(transaction.gatewayId);
-//         if (!creditCard) {
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//         if (((creditCard.allowedLimit - creditCard.limitUsage) < transaction.amount)) {
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//         if (debitAccount.balance < transaction.amount) {
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//         const session = await conn.startSession();
-//         try {
-//           session.startTransaction();
-//           creditCard.limitUsage += transaction.amount;
-//           await CreditCard(creditCard).save({ session });
-//           creditAccount.balance += transaction.amount;
-//           await Account(creditAccount).save({ session });
-//           debitAccount.balance -= transaction.amount;
-//           await Account(debitAccount).save({ session });
+const exchangeInstance = axios.create({
+  baseURL: `https://v6.exchangerate-api.com/v6/${exchangeApiKey}/pair`,
+  timeout: 1000,
+  validateStatus: () => true,
 
-//           await session.commitTransaction();
-//           session.endSession();
-//           console.log('success');
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.APPROVED },
-//             },
-//           };
-//         } catch (error) {
-//           console.log('error');
-//           console.log(error);
-//           await session.abortTransaction();
-//           session.endSession();
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//       } else {
-//         if (debitAccount.balance < transaction.amount) {
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//         const session = await conn.startSession();
-//         try {
-//           session.startTransaction();
-//           creditAccount.balance += transaction.amount;
-//           await creditAccount.save({ session });
-//           debitAccount.balance -= transaction.amount;
-//           await debitAccount.save({ session });
+});
 
-//           await session.commitTransaction();
-//           session.endSession();
-//           console.log('success');
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.APPROVED },
-//             },
-//           };
-//         } catch (error) {
-//           console.log('error');
-//           console.log(error);
-//           await session.abortTransaction();
-//           session.endSession();
-//           return {
-//             updateOne: {
-//               filter: { _id: transaction._id },
-//               update: { status: transactionStatusEnum.REFUSED },
-//             },
-//           };
-//         }
-//       }
-//     } catch (error) {
-//       return {
-//         updateOne: {
-//           filter: { _id: transaction._id },
-//           update: { status: transactionStatusEnum.REFUSED },
-//         },
-//       };
-//     }
-//   }));
+const isTheSameCurrency = (exchangeCurrency) => {
+  const currencies = exchangeCurrency.split('/');
+  return currencies[0] === currencies[1];
+};
 
-//   await Transaction.bulkWrite(updates);
-//   console.log('running a task every 3 seconds');
-// });
+const getConversionResult = async (currencyPair, amount) => {
+  const response = await exchangeApiKey.get(`/${currencyPair}/${amount}`);
+  return response.data.conversion_result;
+};
 
-// module.exports = transactionCron;
+const transactionCron = cron.schedule('*/30 * * * * *', async () => {
+  // await connect();
+  const transactions = await Transaction
+    .findAll({
+      where: {
+        status: transactionStatusEnum.PENDING,
+
+      },
+      raw: true,
+      nest: true,
+      limit: 10,
+    });
+  //   const t = await sequelize.transaction();
+
+  const results = await Promise.all(transactions.map(async (transaction) => {
+    console.count('arrived');
+    const amount = isTheSameCurrency(transaction.currencyExchange)
+      ? transaction.amount
+      : await getConversionResult(transaction.currencyExchange);
+
+    try {
+      const debitAccount = await Account.findByPk(transaction.debitAccountId);
+      if (!debitAccount && transactionGatewayEnum.DEPOSIT) {
+        await Transaction.update(
+          { status: transactionStatusEnum.REFUSED },
+          { where: { id: transaction.id } },
+        );
+        console.log('step 1');
+        return false;
+      }
+      const creditAccount = await Account.findByPk(transaction.creditAccountId);
+      if (!creditAccount) {
+        await Transaction.update(
+          { status: transactionStatusEnum.REFUSED },
+          { where: { id: transaction.id } },
+        );
+        console.log('step 2');
+        return false;
+      }
+      if (transaction.gateway == transactionGatewayEnum.DEPOSIT) {
+        const t = await sequelize.transaction();
+
+        try {
+          creditAccount.balance += amount;
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
+          await Transaction.update(
+            { status: transactionStatusEnum.APPROVED },
+            { where: { id: transaction.id }, transaction: t },
+          );
+          await t.commit();
+          return true;
+        } catch (error) {
+          await t.rollback();
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          return false;
+        }
+      } else if (transaction.gateway == transactionGatewayEnum.CREDIT_CARD) {
+        const creditCard = await CreditCard.findByPk(transaction.gatewayId);
+        if (!creditCard) {
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          console.log('step 3');
+          return false;
+        }
+        if (((creditCard.allowedLimit - creditCard.limitUsage) < amount)) {
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          console.log('step 4');
+          return false;
+        }
+        if (debitAccount.balance < amount) {
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          console.log('step 5');
+          return false;
+        }
+        const t = await sequelize.transaction();
+
+        try {
+          creditCard.limitUsage += amount;
+
+          await CreditCard.update(
+            { limitUsage: creditCard.limitUsage },
+            { where: { id: creditCard.id }, transaction: t },
+          );
+          creditAccount.balance += transaction.amount;
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
+          debitAccount.balance -= amount;
+          await Account.update(
+            { balance: debitAccount.balance },
+            { where: { id: debitAccount.id }, transaction: t },
+          );
+          await Transaction.update(
+            { status: transactionStatusEnum.APPROVED },
+            { where: { id: transaction.id }, transaction: t },
+          );
+          await t.commit();
+          return true;
+        } catch (error) {
+          await t.rollback();
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          return false;
+        }
+      } else {
+        if (debitAccount.balance < amount) {
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          console.log('6');
+          return false;
+        }
+        const t = await sequelize.transaction();
+
+        try {
+          creditAccount.balance += transaction.amount;
+          await Account.update(
+            { balance: creditAccount.balance },
+            { where: { id: creditAccount.id }, transaction: t },
+          );
+          debitAccount.balance -= amount;
+          await Account.update(
+            { balance: debitAccount.balance },
+            { where: { id: debitAccount.id }, transaction: t },
+          );
+          await Transaction.update(
+            { status: transactionStatusEnum.APPROVED },
+            { where: { id: transaction.id }, transaction: t },
+          );
+          await t.commit();
+          return true;
+        } catch (error) {
+          await t.rollback();
+          await Transaction.update(
+            { status: transactionStatusEnum.REFUSED },
+            { where: { id: transaction.id } },
+          );
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      await Transaction.update(
+        { status: transactionStatusEnum.REFUSED },
+        { where: { id: transaction.id } },
+      );
+      return false;
+    }
+  }));
+
+  fs.appendFileSync('data.csv', `${results.join('", "')}`);
+});
+
+module.exports = transactionCron;
