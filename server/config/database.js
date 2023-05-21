@@ -1,6 +1,12 @@
 const Sequelize = require('sequelize');
+const {
+  dbPassword, dbHost, database, dbUser,
+} = require('./vars');
 
-const sequelize = new Sequelize('mysql://ecom:password@localhost:3306/ecom', { logging: false });
+const sequelize = new Sequelize(
+  `mysql://${dbUser}:${dbPassword}@${dbHost}:3306/${database}`,
+  { logging: false },
+);
 
 const connect = async () => {
   try {
