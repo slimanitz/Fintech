@@ -392,8 +392,6 @@ describe('Testing Client API Endpoints', () => {
           name: 'Test Subscription ',
           frequency: subscriptionFrequency.MONTHLY,
           finishDate: moment().add(1, 'years').toDate(),
-          currency: 'EUR',
-
         };
 
         const res = await request(app).post(`/api/users/${user.id}/accounts/${account.id}/subscriptions`).set('Authorization', token).send(payload);
