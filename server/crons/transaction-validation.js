@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const fs = require('fs');
 const axios = require('axios');
 const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
-const { connect, sequelize } = require('../config/database');
+const { sequelize } = require('../config/database');
 const Transaction = require('../api/models/transaction');
 const Account = require('../api/models/account');
 const CreditCard = require('../api/models/creditCard');
@@ -21,12 +21,11 @@ const isTheSameCurrency = (exchangeCurrency) => {
 };
 
 const getConversionResult = async (currencyPair, amount) => {
-  const response = await exchangeApiKey.get(`/${currencyPair}/${amount}`);
+  const response = await exchangeInstance.get(`/${currencyPair}/${amount}`);
   return response.data.conversion_result;
 };
 
-const transactionCron = cron.schedule('*/30 * * * * *', async () => {
-  // await connect();
+const transactionCron = cron.schedule('*/10 * * * * *', async () => {
   const transactions = await Transaction
     .findAll({
       where: {
@@ -37,10 +36,8 @@ const transactionCron = cron.schedule('*/30 * * * * *', async () => {
       nest: true,
       limit: 10,
     });
-  //   const t = await sequelize.transaction();
 
   const results = await Promise.all(transactions.map(async (transaction) => {
-    console.count('arrived');
     const amount = isTheSameCurrency(transaction.currencyExchange)
       ? transaction.amount
       : await getConversionResult(transaction.currencyExchange);
@@ -152,7 +149,7 @@ const transactionCron = cron.schedule('*/30 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('6');
+          console.log('step 6');
           return false;
         }
         const t = await sequelize.transaction();
