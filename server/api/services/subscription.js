@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const Joi = require('joi');
+const moment = require('moment');
 const Subscription = require('../models/subscription');
 const APIError = require('../../utils/api-error');
 const { redisClient } = require('../../config/cache');
@@ -15,8 +16,8 @@ const schema = Joi.object({
   userId: Joi.string().required(),
   frequency: Joi.string().required(),
   finishDate: Joi.date().required(),
-  currency: Joi.string().required(),
-
+  lastTransaction: Joi.date().required(),
+  currencyExchange: Joi.string().required(),
 });
 
 const createUserSubscriptionSchema = Joi.object({
@@ -27,8 +28,6 @@ const createUserSubscriptionSchema = Joi.object({
   userId: Joi.string().required(),
   frequency: Joi.string().valid(...Object.values(subscriptionFrequency)).required(),
   finishDate: Joi.date().required(),
-  currency: Joi.string().required(),
-
 });
 
 const updateUserSubscriptionSchema = Joi.object({
@@ -97,11 +96,25 @@ const createUserSubscription = async ({ userId, accountId }, payload) => {
   const debitAccount = await accountService.getAll({ userId, id: accountId }, false);
   if (!debitAccount) throw new APIError({ message: `Account with the following ID is not found ${subscription.debitAccount}`, status: httpStatus.CONFLICT });
   if ((creditAccount.type === accountTypesEnum.SAVING || debitAccount.type === accountTypesEnum.SAVING) && (debitAccount.userId.toString() !== userId || creditAccount.userId.toString() !== userId)) throw new APIError({ message: 'Cannot make subscription to someone else s saving account', status: httpStatus.CONFLICT });
+  switch (subscription.frequency) {
+    case subscriptionFrequency.DAILY:
+      subscription.lastTransaction = moment().add(1, 'days').toDate();
+      break;
+    case subscriptionFrequency.WEEKLY:
+      subscription.lastTransaction = moment().add(1, 'weeks').toDate();
+      break;
+    case subscriptionFrequency.MONTHLY:
+      subscription.lastTransaction = moment().add(1, 'months').toDate();
+      break;
 
+    default:
+      break;
+  }
   subscription = {
     ...subscription,
     creditAccountId: creditAccount.id,
     type: subscriptionTypes.DEBIT,
+    currencyExchange: `${debitAccount.currency}/${creditAccount.currency}`,
   };
 
   delete subscription.creditAccountIban;
