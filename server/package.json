@@ -33,6 +33,7 @@
     "piscina": "^3.2.0",
     "sequelize": "^6.31.0",
     "supertest": "^6.3.3",
+    "swagger-ui-express": "^4.6.3",
     "threads": "^1.7.0"
   },
   "devDependencies": {

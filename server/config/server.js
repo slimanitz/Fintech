@@ -5,8 +5,10 @@ const morgan = require('morgan');
 const cors = require('cors');
 const expressMonitor = require('express-status-monitor');
 const timeout = require('connect-timeout');
+const swaggerUi = require('swagger-ui-express');
 const router = require('../api/routes');
 const { errorHandler } = require('../middlewares/error');
+const apiDocumentation = require('../docs/apidocs');
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -15,6 +17,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 app.use(express.json());
 app.use(expressMonitor());
 app.use('/api', router);
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(apiDocumentation));
 app.use(errorHandler);
 
 module.exports = app;
