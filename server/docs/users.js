@@ -1,6 +1,7 @@
+// POST /api/users
 const createUser = {
   tags: ['Users'],
-  description: 'Create a new use in the system',
+  description: 'Create a new user in the system',
   operationId: 'createUser',
   security: [
     {
@@ -18,18 +19,14 @@ const createUser = {
     required: true,
   },
   responses: {
-    201: {
+    200: {
       description: 'User created successfully!',
       content: {
         'application/json': {
           schema: {
             type: 'object',
             properties: {
-              _id: {
-                type: 'string',
-                example: '60564fcb544047cdc3844818',
-              },
-              fullName: {
+              name: {
                 type: 'string',
                 example: 'John Snow',
               },
@@ -39,23 +36,104 @@ const createUser = {
               },
               password: {
                 type: 'string',
-                example: '442893aba778ab321dc151d9b1ad98c64ed56c07f8cbaed',
+                example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
               },
-              enabled: {
+              isActive: {
                 type: 'boolean',
                 example: true,
               },
               role: {
                 type: 'string',
-                example: '605636683f6e29c81c8b2db0',
+                example: 'CLIENT',
               },
-              createdAt: {
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: 'Internal Server Error',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
                 type: 'string',
-                example: '2021-03-20T19:40:59.495Z',
+                example: 'Internal Server Error',
               },
-              updatedAt: {
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+// GET /api/users/{id}
+const findOneUser = {
+  tags: ['Users'],
+  description: 'Find a specific user by Id',
+  operationId: 'findOneUser',
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  parameters: [
+    {
+      name: 'id',
+      in: 'path',
+      description: 'ID of the entity',
+      required: true,
+      schema: {
+        type: 'string',
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: 'Return the user with the following Id or return CODE 404 if not found',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              name: {
                 type: 'string',
-                example: '2021-03-20T21:23:10.879Z',
+                example: 'John Snow',
+              },
+              email: {
+                type: 'string',
+                example: 'john.snow@email.com',
+              },
+              password: {
+                type: 'string',
+                example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+              },
+              isActive: {
+                type: 'boolean',
+                example: true,
+              },
+              role: {
+                type: 'string',
+                example: 'CLIENT',
+              },
+            },
+          },
+        },
+      },
+    },
+    404: {
+      description: 'Not found',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'No User found',
               },
             },
           },
@@ -84,7 +162,7 @@ const createUser = {
 const createUserBody = {
   type: 'object',
   properties: {
-    fullName: {
+    name: {
       type: 'string',
       example: 'John Snow',
     },
@@ -94,8 +172,7 @@ const createUserBody = {
     },
     password: {
       type: 'string',
-      description: "unencrypted user's password",
-      example: '!1234aWe1Ro3$#',
+      example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
     },
     enabled: {
       type: 'boolean',
@@ -103,9 +180,9 @@ const createUserBody = {
     },
     role: {
       type: 'string',
-      example: '605636683f6e29c81c8b2db0',
+      example: '',
     },
   },
 };
 
-module.exports = { createUser, createUserBody };
+module.exports = { createUser, createUserBody, findOneUser };
