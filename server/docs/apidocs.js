@@ -1,5 +1,10 @@
 const {
-  createUserBody, createUser, findOneUser, getAllUsers,
+  createUserBody,
+  createUser,
+  findOneUser,
+  getAllUsers,
+  loginUser,
+  userLoginBody,
 } = require('./users');
 
 const apiDocumentation = {
@@ -61,6 +66,9 @@ const apiDocumentation = {
     '/api/users/{id}': {
       get: findOneUser,
     },
+    '/api/users/login': {
+      post: loginUser,
+    },
   },
   components: {
     securitySchemes: {
@@ -72,6 +80,7 @@ const apiDocumentation = {
     },
     schemas: {
       createUserBody,
+      userLoginBody,
     },
   },
 };

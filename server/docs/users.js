@@ -289,6 +289,110 @@ const getAllUsers = {
   },
 };
 
+// POST /api/users/login
+const loginUser = {
+  tags: ['Users'],
+  description: 'Log in a user',
+  operationId: 'loginUser',
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  requestBody: {
+    content: {
+      'application/json': {
+        schema: {
+          $ref: '#/components/schemas/userLoginBody',
+        },
+      },
+    },
+    required: true,
+  },
+  responses: {
+    200: {
+      description: 'User created successfully!',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                example: 'John Snow',
+              },
+              email: {
+                type: 'string',
+                example: 'john.snow@email.com',
+              },
+              password: {
+                type: 'string',
+                example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+              },
+              isActive: {
+                type: 'boolean',
+                example: true,
+              },
+              role: {
+                type: 'string',
+                example: 'CLIENT',
+              },
+              token: {
+                type: 'string',
+                example:
+                  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiODc4M2M4OGMtYTA4MC00MDAxLWI4MjMtMTQ0NDMzMTllY2ZmIiwibmFtZSI6IkpvaG4gU25vdyIsImVtYWlsIjoiam9obi5zMm5vd0BlbWFpbC5jb20iLCJwYXNzd29yZCI6IjViYWE2MWU0YzliOTNmM2YwNjgyMjUwYjZjZjgzMzFiN2VlNjhmZDgiLCJpc0FjdGl2ZSI6dHJ1ZSwicm9sZSI6IkNMSUVOVCIsImNyZWF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSIsInVwZGF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSJ9LCJpYXQiOjE2ODU5MDE3ODIsImV4cCI6MTY4NTkwODk4Mn0.X8Ou1q5IPHM1HHJHuHGQkLmM0we4vHLttm5-YupwLIo',
+              },
+            },
+          },
+        },
+      },
+    },
+    401: {
+      description: 'Wrong credentials',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Wrong credentials',
+              },
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: 'Internal Server Error',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Internal Server Error',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+// {
+//   "id": "8783c88c-a080-4001-b823-14443319ecff",
+//   "name": "John Snow",
+//   "email": "john.s2now@email.com",
+//   "isActive": true,
+//   "role": "CLIENT",
+//   "createdAt": "Sun Jun 04 2023 19:02:34 GMT+0100 (GMT+01:00)",
+//   "updatedAt": "Sun Jun 04 2023 19:02:34 GMT+0100 (GMT+01:00)",
+//   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiODc4M2M4OGMtYTA4MC00MDAxLWI4MjMtMTQ0NDMzMTllY2ZmIiwibmFtZSI6IkpvaG4gU25vdyIsImVtYWlsIjoiam9obi5zMm5vd0BlbWFpbC5jb20iLCJwYXNzd29yZCI6IjViYWE2MWU0YzliOTNmM2YwNjgyMjUwYjZjZjgzMzFiN2VlNjhmZDgiLCJpc0FjdGl2ZSI6dHJ1ZSwicm9sZSI6IkNMSUVOVCIsImNyZWF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSIsInVwZGF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSJ9LCJpYXQiOjE2ODU5MDE3ODIsImV4cCI6MTY4NTkwODk4Mn0.X8Ou1q5IPHM1HHJHuHGQkLmM0we4vHLttm5-YupwLIo"
+// }
+
 const createUserBody = {
   type: 'object',
   properties: {
@@ -304,17 +408,23 @@ const createUserBody = {
       type: 'string',
       example: 'password',
     },
-    enabled: {
-      type: 'boolean',
-      example: true,
-    },
-    role: {
+  },
+};
+const userLoginBody = {
+  type: 'object',
+  properties: {
+    email: {
       type: 'string',
-      example: 'CLIENT',
+      example: 'john.snow@email.com',
     },
+    password: {
+      type: 'string',
+      example: 'password',
+    },
+
   },
 };
 
 module.exports = {
-  createUser, createUserBody, findOneUser, getAllUsers,
+  createUser, createUserBody, findOneUser, getAllUsers, loginUser, userLoginBody,
 };
