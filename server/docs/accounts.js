@@ -2,7 +2,7 @@ const createUserBankAccount = {
   tags: ['Accounts'],
   description: 'Create a new user bank Account',
   operationId: 'createUserBankAccount',
-  security: { basicJWT: [] },
+  security: [{ bearerAuth: [] }],
   requestBody: {
     content: {
       'application/json': {
