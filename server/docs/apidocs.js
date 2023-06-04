@@ -1,10 +1,15 @@
 const {
+  createUserBankAccount,
+  createUserBankAccountBody,
+} = require('./accounts');
+const {
   createUserBody,
   createUser,
   findOneUser,
   getAllUsers,
   loginUser,
   userLoginBody,
+
 } = require('./users');
 
 const apiDocumentation = {
@@ -69,10 +74,13 @@ const apiDocumentation = {
     '/api/users/login': {
       post: loginUser,
     },
+    '/api/users/{userId}/accounts': {
+      post: createUserBankAccount,
+    },
   },
   components: {
     securitySchemes: {
-      bearerAuth: {
+      basicJWT: {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
@@ -81,6 +89,7 @@ const apiDocumentation = {
     schemas: {
       createUserBody,
       userLoginBody,
+      createUserBankAccountBody,
     },
   },
 };
