@@ -1,4 +1,4 @@
-const { createUserBody, createUser } = require('./users');
+const { createUserBody, createUser, findOneUser } = require('./users');
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -8,8 +8,8 @@ const apiDocumentation = {
     description: 'Description of my API here',
     termsOfService: 'https://mysite.com/terms',
     contact: {
-      name: 'Developer name',
-      email: 'dev@example.com',
+      name: 'Fintech',
+      email: 'slimane@scaa.fr',
       url: 'https://devwebsite.com',
     },
     license: {
@@ -19,7 +19,7 @@ const apiDocumentation = {
   },
   servers: [
     {
-      url: 'http://localhost:4500/',
+      url: 'http://localhost:8080/',
       description: 'Local Server',
     },
     {
@@ -29,15 +29,32 @@ const apiDocumentation = {
   ],
   tags: [
     {
-      name: 'Roles',
+      name: 'Users',
+      description: 'User Entity',
     },
     {
-      name: 'Users',
+      name: 'Accounts',
+      description: 'Bank account entity',
+    },
+    {
+      name: 'Credit Cards',
+      description: 'Bank account entity',
+    },
+    {
+      name: 'Transactions',
+      description: 'Transaction entity which will regroup multiple types of transactions (Bank deposits, Bank transfer, Credit Card Payments)',
+    },
+    {
+      name: 'Subscriptions',
+      description: 'Subscription entity which will regroup monthly salaries, loans etc...',
     },
   ],
   paths: {
-    users: {
+    '/api/users': {
       post: createUser,
+    },
+    '/api/users/{id}': {
+      get: findOneUser,
     },
   },
   components: {
