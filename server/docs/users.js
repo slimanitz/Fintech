@@ -159,6 +159,136 @@ const findOneUser = {
   },
 };
 
+// GET /api/users
+const getAllUsers = {
+  tags: ['Users'],
+  description:
+    'Find all users that matches the the specifications in the request Query',
+  operationId: 'findOneUser',
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  parameters: [
+    {
+      name: 'id',
+      in: 'query',
+      description: 'ID of the user',
+      required: false,
+      schema: {
+        type: 'string',
+      },
+    },
+    {
+      name: 'name',
+      in: 'query',
+      description: 'Name of the user',
+      required: false,
+      schema: {
+        type: 'string',
+      },
+    },
+    {
+      name: 'email',
+      in: 'query',
+      description: 'Email of the user',
+      required: false,
+      schema: {
+        type: 'string',
+      },
+    },
+    {
+      name: 'isActive',
+      in: 'query',
+      description: 'Boolean to check if user is active or not',
+      required: false,
+      schema: {
+        type: 'boolean',
+      },
+    },
+    {
+      name: 'role',
+      in: 'query',
+      description: 'Role of the user must be from the following values',
+      required: false,
+      schema: {
+        type: 'string',
+        default: 'CLIENT',
+        description: 'CLIENT represents the basic role of the application\n Admin represents the admin role of the application that has admin features',
+        enum: ['ADMIN', 'CLIENT'],
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description:
+        'Return array of user Object',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                example: 'John Snow',
+              },
+              email: {
+                type: 'string',
+                example: 'john.snow@email.com',
+              },
+              password: {
+                type: 'string',
+                example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+              },
+              isActive: {
+                type: 'boolean',
+                example: true,
+              },
+              role: {
+                type: 'string',
+                example: 'CLIENT',
+              },
+            },
+          },
+        },
+      },
+    },
+    404: {
+      description: 'Not found',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'No User found',
+              },
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: 'Internal Server Error',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Internal Server Error',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const createUserBody = {
   type: 'object',
   properties: {
@@ -172,7 +302,7 @@ const createUserBody = {
     },
     password: {
       type: 'string',
-      example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+      example: 'password',
     },
     enabled: {
       type: 'boolean',
@@ -180,9 +310,11 @@ const createUserBody = {
     },
     role: {
       type: 'string',
-      example: '',
+      example: 'CLIENT',
     },
   },
 };
 
-module.exports = { createUser, createUserBody, findOneUser };
+module.exports = {
+  createUser, createUserBody, findOneUser, getAllUsers,
+};

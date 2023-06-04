@@ -1,4 +1,6 @@
-const { createUserBody, createUser, findOneUser } = require('./users');
+const {
+  createUserBody, createUser, findOneUser, getAllUsers,
+} = require('./users');
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -42,16 +44,19 @@ const apiDocumentation = {
     },
     {
       name: 'Transactions',
-      description: 'Transaction entity which will regroup multiple types of transactions (Bank deposits, Bank transfer, Credit Card Payments)',
+      description:
+        'Transaction entity which will regroup multiple types of transactions (Bank deposits, Bank transfer, Credit Card Payments)',
     },
     {
       name: 'Subscriptions',
-      description: 'Subscription entity which will regroup monthly salaries, loans etc...',
+      description:
+        'Subscription entity which will regroup monthly salaries, loans etc...',
     },
   ],
   paths: {
     '/api/users': {
       post: createUser,
+      get: getAllUsers,
     },
     '/api/users/{id}': {
       get: findOneUser,
