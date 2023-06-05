@@ -382,17 +382,6 @@ const loginUser = {
   },
 };
 
-// {
-//   "id": "8783c88c-a080-4001-b823-14443319ecff",
-//   "name": "John Snow",
-//   "email": "john.s2now@email.com",
-//   "isActive": true,
-//   "role": "CLIENT",
-//   "createdAt": "Sun Jun 04 2023 19:02:34 GMT+0100 (GMT+01:00)",
-//   "updatedAt": "Sun Jun 04 2023 19:02:34 GMT+0100 (GMT+01:00)",
-//   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiODc4M2M4OGMtYTA4MC00MDAxLWI4MjMtMTQ0NDMzMTllY2ZmIiwibmFtZSI6IkpvaG4gU25vdyIsImVtYWlsIjoiam9obi5zMm5vd0BlbWFpbC5jb20iLCJwYXNzd29yZCI6IjViYWE2MWU0YzliOTNmM2YwNjgyMjUwYjZjZjgzMzFiN2VlNjhmZDgiLCJpc0FjdGl2ZSI6dHJ1ZSwicm9sZSI6IkNMSUVOVCIsImNyZWF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSIsInVwZGF0ZWRBdCI6IlN1biBKdW4gMDQgMjAyMyAxOTowMjozNCBHTVQrMDEwMCAoR01UKzAxOjAwKSJ9LCJpYXQiOjE2ODU5MDE3ODIsImV4cCI6MTY4NTkwODk4Mn0.X8Ou1q5IPHM1HHJHuHGQkLmM0we4vHLttm5-YupwLIo"
-// }
-
 const createUserBody = {
   type: 'object',
   properties: {
