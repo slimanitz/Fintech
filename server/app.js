@@ -3,8 +3,8 @@ const { connect, sequelize } = require('./config/database');
 const { connectQueue } = require('./config/rabbitmq');
 const app = require('./config/server');
 const { host } = require('./config/vars');
-const SubscriptionCron = require('./crons/subscription');
-// const transactionCron = require('./crons/transaction-validation');
+const SubscriptionCron = require('./crons/subscription-to-transaction');
+const transactionCron = require('./crons/transaction-validation');
 
 app.listen(8080, async () => {
   await connect();

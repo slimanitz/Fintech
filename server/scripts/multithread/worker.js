@@ -91,9 +91,12 @@ const simulation = async ({ email, password }, accounts) => {
         amount: Math.floor(Math.random() * 2000),
         creditAccountIban: creditAcccount.iban,
         name: 'Test Subscription ',
-        frequency: subscriptionFrequency.DAILY,
+        frequency: Object.values(subscriptionFrequency)[
+          Math.floor(
+            Math.random() * Object.values(subscriptionFrequency).length,
+          )
+        ],
         finishDate: moment().add(2, 'years'),
-        currency: 'EUR',
       };
 
       const res = await instance.post(`/users/${user.id}/accounts/${account.id}/subscriptions`, payload);
