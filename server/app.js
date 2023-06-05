@@ -6,6 +6,7 @@ const app = require('./config/server');
 const { host } = require('./config/vars');
 const SubscriptionCron = require('./crons/subscription-to-transaction');
 const transactionCron = require('./crons/transaction-validation');
+const transactionInsertionCron = require('./crons/transaction-insertion');
 
 app.listen(8080, async () => {
   await connect();

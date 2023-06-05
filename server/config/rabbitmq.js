@@ -28,12 +28,11 @@ class RabbitMq {
     const channel = await this.connection.createChannel();
     const messages = [];
     await channel.consume(topic, (message) => {
-      console.log(`Inside Consumer ${Buffer.from(message.content)}`);
+      // console.log(`Inside Consumer ${Buffer.from(message.content)}`);
       messages.push(message);
     }, { noAck: false });
-    await channel.close();
 
-    return messages;
+    return { messages, channel };
   };
 
   createSubject = async (topic) => {
