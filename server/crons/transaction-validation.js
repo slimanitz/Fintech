@@ -25,7 +25,7 @@ const getConversionResult = async (currencyPair, amount) => {
   return response.data.conversion_result;
 };
 
-const transactionCron = cron.schedule('*/10 * * * * *', async () => {
+const transactionCron = cron.schedule('*/30 * * * * *', async () => {
   const transactions = await Transaction
     .findAll({
       where: {

@@ -9,7 +9,7 @@ const { sequelize } = require('../config/database');
 
 let currentDate = moment();
 
-const SubscriptionCron = cron.schedule('*/5 * * * * *', async () => {
+const SubscriptionCron = cron.schedule('*/30 * * * * *', async () => {
   const subscriptions = await Subscription.findAll({
     where: {
       isCancelled: false,
