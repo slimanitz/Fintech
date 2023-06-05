@@ -77,6 +77,8 @@ const ibanToCurrencies = {
 const subscriptionTypes = { DEBIT: 'DEBIT', CREDIT: 'CREDIT' };
 const subscriptionFrequency = { DAILY: 'DAILY', WEEKLY: 'WEEKLY', MONTHLY: 'MONTHLY' };
 
+const rabbitTopicsEnum = { TRANSACTIONS: 'transactions' };
+
 module.exports = {
   ibanToCurrencies,
   accountTypesEnum,
@@ -85,4 +87,5 @@ module.exports = {
   transactionStatusEnum,
   subscriptionTypes,
   subscriptionFrequency,
+  rabbitTopicsEnum,
 };
