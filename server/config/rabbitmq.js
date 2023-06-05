@@ -1,16 +1,48 @@
+/* eslint-disable class-methods-use-this */
 const amqp = require('amqplib');
 
-let channel; let
-  connection; // global variables
-async function connectQueue() {
-  try {
-    connection = await amqp.connect('amqp://localhost:5672');
-    channel = await connection.createChannel();
+class RabbitMq {
+  connection;
 
-    await channel.assertQueue('test-queue');
-  } catch (error) {
-    console.log(error);
-  }
+  channel;
+
+  connectQueue = async () => {
+    try {
+      this.connection = await amqp.connect('amqp://localhost:5672');
+      this.channel = await this.connection.createChannel();
+      console.log('Connected to RabbitMQ succesfully');
+    } catch (error) {
+      console.log('Error connectting to RabbitMQ');
+      console.log(error);
+    }
+  };
+
+  publishData = async (topic, data) => {
+    // send data to queue
+    await this.channel.sendToQueue(topic, Buffer.from(JSON.stringify(data), { nack: true }), {
+      persistent: true,
+    });
+  };
+
+  consumeData = async (topic) => {
+    const channel = await this.connection.createChannel();
+    const messages = [];
+    await channel.consume(topic, (message) => {
+      console.log(`Inside Consumer ${Buffer.from(message.content)}`);
+      messages.push(message);
+    }, { noAck: false });
+    await channel.close();
+
+    return messages;
+  };
+
+  createSubject = async (topic) => {
+    await this.channel.assertQueue(topic, {
+      durable: true,
+    });
+  };
 }
 
-module.exports = { connectQueue, channel, connection };
+const rabbitMqClient = new RabbitMq();
+
+module.exports = rabbitMqClient;
