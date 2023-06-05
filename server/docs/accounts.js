@@ -1,8 +1,22 @@
+const { accountTypesEnum } = require('../utils/enums');
+
+// POST /api/users/{userId}/accounts
 const createUserBankAccount = {
   tags: ['Accounts'],
   description: 'Create a new user bank Account',
   operationId: 'createUserBankAccount',
   security: [{ bearerAuth: [] }],
+  parameters: [
+    {
+      name: 'userId',
+      in: 'path',
+      description: 'ID of the user who will own the created account',
+      required: true,
+      schema: {
+        type: 'string',
+      },
+    },
+  ],
   requestBody: {
     content: {
       'application/json': {
@@ -21,25 +35,49 @@ const createUserBankAccount = {
           schema: {
             type: 'object',
             properties: {
-              name: {
+              id: {
                 type: 'string',
-                example: 'John Snow',
+                example: '21b93fa7-f4b9-4ae4-89f2-d67daa0aab7f',
               },
-              email: {
-                type: 'string',
-                example: 'john.snow@email.com',
-              },
-              password: {
-                type: 'string',
-                example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+              balance: {
+                type: 'int',
+                example: 20000,
               },
               isActive: {
                 type: 'boolean',
                 example: true,
               },
-              role: {
+              userId: {
+                type: 'bb7b7e18-f339-4d97-879c-ab60e05851e0',
+                example: true,
+              },
+              type: {
                 type: 'string',
-                example: 'CLIENT',
+                example: 'BASIC',
+              },
+              iban: {
+                type: 'string',
+                example: 'KZ86003R4750340X3892',
+              },
+              currency: {
+                type: 'string',
+                example: 'KZT',
+              },
+            },
+          },
+        },
+      },
+    },
+    400: {
+      description: 'Bad payload',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Bad payload',
               },
             },
           },
@@ -68,26 +106,12 @@ const createUserBankAccount = {
 const createUserBankAccountBody = {
   type: 'object',
   properties: {
-    name: {
+    type: {
       type: 'string',
-      example: 'John Snow',
+      example: accountTypesEnum.BASIC,
+      description: 'This field can be one of the following values [BASIC,SAVING,FROZEN]',
     },
-    email: {
-      type: 'string',
-      example: 'john.snow@email.com',
-    },
-    password: {
-      type: 'string',
-      example: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
-    },
-    enabled: {
-      type: 'boolean',
-      example: true,
-    },
-    role: {
-      type: 'string',
-      example: '',
-    },
+
   },
 };
 

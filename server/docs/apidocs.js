@@ -80,7 +80,7 @@ const apiDocumentation = {
   },
   components: {
     securitySchemes: {
-      basicJWT: {
+      bearerAuth: {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
