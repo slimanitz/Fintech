@@ -1,6 +1,7 @@
 const {
   createUserBankAccount,
   createUserBankAccountBody,
+  getAllUserBankAccounts,
 } = require('./accounts');
 const {
   createUserBody,
@@ -76,6 +77,7 @@ const apiDocumentation = {
     },
     '/api/users/{userId}/accounts': {
       post: createUserBankAccount,
+      get: getAllUserBankAccounts,
     },
   },
   components: {
