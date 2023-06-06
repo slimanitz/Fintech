@@ -40,7 +40,7 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
   const results = await Promise.all(transactions.map(async (transaction) => {
     const amount = isTheSameCurrency(transaction.currencyExchange)
       ? transaction.amount
-      : await getConversionResult(transaction.currencyExchange);
+      : await getConversionResult(transaction.currencyExchange, transaction.amount);
 
     try {
       const debitAccount = await Account.findByPk(transaction.debitAccountId);
