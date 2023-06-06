@@ -12,6 +12,7 @@
     "test": "APP_ENV=test jest --setupFiles dotenv/config --detectOpenHandles --forceExit --collectCoverage"
   },
   "dependencies": {
+    "amqplib": "^0.10.3",
     "axios": "^1.4.0",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.5",
