@@ -2,10 +2,13 @@ const httpStatus = require('http-status');
 const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
-const { transactionGatewayEnum, transactionStatusEnum, accountTypesEnum } = require('../../utils/enums');
+const {
+  transactionGatewayEnum, transactionStatusEnum, accountTypesEnum, rabbitTopicsEnum,
+} = require('../../utils/enums');
 const { redisClient } = require('../../config/cache');
 const { creditCardService } = require('./creditCard');
 const { accountService } = require('./account');
+const rabbitMqClient = require('../../config/rabbitmq');
 
 const insertionSchema = Joi.object({
   creditAccountId: Joi.string().required(),
@@ -50,8 +53,9 @@ function filter(arr, criteria) {
 const create = async (transaction) => {
   const { error, value } = insertionSchema.validate(transaction);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
-  const newTransaction = await Transaction.create(value);
+  const newTransaction = new Transaction(value);
   await redisClient.deleteList('transactions');
+  rabbitMqClient.publishData(rabbitTopicsEnum.TRANSACTIONS, newTransaction);
   return newTransaction;
 };
 

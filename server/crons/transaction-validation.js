@@ -1,5 +1,4 @@
 const cron = require('node-cron');
-const fs = require('fs');
 const axios = require('axios');
 const { transactionStatusEnum, transactionGatewayEnum } = require('../utils/enums');
 const { sequelize } = require('../config/database');
@@ -25,7 +24,7 @@ const getConversionResult = async (currencyPair, amount) => {
   return response.data.conversion_result;
 };
 
-const transactionCron = cron.schedule('*/10 * * * * *', async () => {
+const transactionCron = cron.schedule('*/30 * * * * *', async () => {
   const transactions = await Transaction
     .findAll({
       where: {
@@ -189,8 +188,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
       return false;
     }
   }));
-
-  fs.appendFileSync('data.csv', `${results.join('", "')}`);
 });
 
 module.exports = transactionCron;
