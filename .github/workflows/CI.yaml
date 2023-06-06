@@ -35,6 +35,10 @@ jobs:
           mysql password: "${{ secrets.DB_PASSWORD }}" # Required if "mysql user" exists. The password for the "mysql user"
       - name: Redis Server in GitHub Actions
         uses: supercharge/redis-github-action@1.5.0
+      - name: RabbitMQ setup
+        uses: nijel/rabbitmq-action@v1.0.0
+        with:
+          rabbitmq version: "5"
       - name: Install dependencies
         run: yarn --cwd ./server/ install
       - name: Test
