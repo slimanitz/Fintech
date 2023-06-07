@@ -27,6 +27,7 @@ class RabbitMq {
   consumeData = async (topic) => {
     const channel = await this.connection.createChannel();
     const messages = [];
+    await channel.prefetch(300);
     await channel.consume(topic, (message) => {
       // console.log(`Inside Consumer ${Buffer.from(message.content)}`);
       messages.push(message);
