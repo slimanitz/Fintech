@@ -3,24 +3,37 @@ const jwt = require('jsonwebtoken');
 const httpStatus = require('http-status');
 const { jwtSecret } = require('../config/vars');
 const APIError = require('../utils/api-error');
+const { redisClient } = require('../config/cache');
 
 // I made a specific login in this middleware where I've make a verification
 // if the user is using a good Agency ID and Iam checking as well on the database if it's coherent
 
-const JWTCheck = (roles) => (req, res, next) => {
+const JWTCheck = (roles) => async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (authHeader) {
       const token = authHeader.split(' ')[1];
       // eslint-disable-next-line consistent-return
+      const cacheUserRole = await redisClient.get(token);
+      if (cacheUserRole) {
+        if (roles.includes(cacheUserRole)) {
+          await redisClient.set(token, cacheUserRole);
+          await redisClient.expire(token, 60000);
+          return next();
+        }
+        res.sendStatus(httpStatus.UNAUTHORIZED);
+        return;
+      }
+
       jwt.verify(token, jwtSecret, async (err, payload) => {
         if (err || !payload) {
           return res.sendStatus(httpStatus.UNAUTHORIZED);
         }
         const { user } = payload;
         if (roles.includes(user.role)) {
-          req.user = user;
+          await redisClient.set(token, user.role);
+          await redisClient.expire(token, 60000);
           return next();
         }
         res.sendStatus(httpStatus.UNAUTHORIZED);
