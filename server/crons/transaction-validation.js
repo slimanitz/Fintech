@@ -21,10 +21,10 @@ const isTheSameCurrency = (exchangeCurrency) => {
 
 const getConversionResult = async (currencyPair, amount) => {
   const response = await exchangeInstance.get(`/${currencyPair}/${amount}`);
-  return response.data.conversion_result;
+  return (response.status == 200) ? response.data.conversion_result : amount;
 };
 
-const transactionCron = cron.schedule('*/30 * * * * *', async () => {
+const transactionCron = cron.schedule('*/10 * * * * *', async () => {
   const transactions = await Transaction
     .findAll({
       where: {
@@ -33,7 +33,7 @@ const transactionCron = cron.schedule('*/30 * * * * *', async () => {
       },
       raw: true,
       nest: true,
-      limit: 10,
+      limit: 100,
     });
 
   const results = await Promise.all(transactions.map(async (transaction) => {
