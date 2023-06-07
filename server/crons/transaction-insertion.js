@@ -4,7 +4,7 @@ const Transaction = require('../api/models/transaction');
 const rabbitMqClient = require('../config/rabbitmq');
 const { rabbitTopicsEnum } = require('../utils/enums');
 
-const transactionInsertionCron = cron.schedule('*/5 * * * * *', async () => {
+const transactionInsertionCron = cron.schedule('*/20 * * * * *', async () => {
   const { messages, channel } = await rabbitMqClient.consumeData(rabbitTopicsEnum.TRANSACTIONS);
   const transactions = messages.map((message) => JSON.parse(Buffer.from(message.content)));
   const t = await sequelize.transaction();
