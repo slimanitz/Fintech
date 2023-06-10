@@ -37,7 +37,7 @@ const main = async () => {
   const accounts = await Account.findAll({
     raw: true,
     nest: true,
-    limit: 100,
+    limit: 50,
     skip: random,
   });
   const threads = [];
