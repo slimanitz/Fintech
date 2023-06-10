@@ -11,7 +11,7 @@ const rabbitMqClient = require('./rabbitmq');
 
 const app = express();
 app.use(cors({ origin: '*' }));
-app.use(timeout('10s'));
+app.use(timeout('20s'));
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 app.use(express.json());
 app.use(expressMonitor());
