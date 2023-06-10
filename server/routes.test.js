@@ -16,6 +16,7 @@ describe('Check before launching tests', () => {
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
       await sequelize.sync({ force: true });
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+      await redisClient.flushall();
     }
     expect(process.env.APP_ENV).toEqual('test');
   }, 10000);

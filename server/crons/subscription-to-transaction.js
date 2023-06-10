@@ -78,12 +78,6 @@ const SubscriptionCron = cron.schedule('*/10 * * * * *', async () => {
     }
   }));
 
-  console.log(result);
-
-  console.log('====================================');
-  console.log('Subscriptions', subscriptions);
-  console.log('====================================');
-
   currentDate = currentDate.add(1, 'day');
 });
 
