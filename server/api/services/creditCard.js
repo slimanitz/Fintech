@@ -5,7 +5,6 @@ const { faker } = require('@faker-js/faker');
 const CreditCard = require('../models/creditCard');
 const APIError = require('../../utils/api-error');
 const { accountTypesEnum } = require('../../utils/enums');
-const { redisClient } = require('../../config/cache');
 const { accountService } = require('./account');
 
 const schema = Joi.object({
@@ -29,28 +28,20 @@ const updateSchema = Joi.object({
   allowedLimit: Joi.number(),
 });
 
-function filter(arr, criteria) {
-  return arr.filter((obj) => Object.keys(criteria).every((c) => obj[c] == criteria[c]));
-}
-
 const create = async (creditCard) => {
   const { error, value } = schema.validate(creditCard);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const newCreditCard = await CreditCard.create(value);
-  await redisClient.deleteList('creditCards');
   return newCreditCard;
 };
 
 const getAll = async (filters, isArray = true) => {
-  let creditCards = await redisClient.getList('creditCards');
-  if (creditCards.length === 0) {
-    creditCards = await CreditCard.findAll({
-      raw: true,
-      nest: true,
-    });
-    await redisClient.setList('creditCards', creditCards);
-  }
-  if (filters) creditCards = filter(creditCards, filters);
+  const creditCards = await CreditCard.findAll({
+    raw: true,
+    nest: true,
+    where: { ...filters },
+  });
+
   if (!isArray) {
     return creditCards[0];
   }
@@ -68,13 +59,11 @@ const update = async (id, payload) => {
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await CreditCard.update(value, { where: { id }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No creditCard found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('creditCards');
   return updatedValue;
 };
 
 const remove = async (id) => {
   await CreditCard.destroy({ where: { id } });
-  await redisClient.deleteList('creditCards');
 };
 
 const createUserAccountCreditCard = async ({ userId, accountId }) => {
@@ -91,7 +80,6 @@ const createUserAccountCreditCard = async ({ userId, accountId }) => {
   value.expirationDate = `${month}/${year}`;
   value.allowedLimit = faker.finance.amount(8000, 10000);
   const creditCard = await create(value);
-  await redisClient.deleteList('creditCards');
   return creditCard;
 };
 
@@ -111,7 +99,6 @@ const updateUserCreditCard = async ({ userId, creditCardId }, payload) => {
   const updatedValue = await CreditCard
     .update(value, { where: { id: creditCardId, userId }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No Credit card found found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('creditCards');
   return updatedValue;
 };
 

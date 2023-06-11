@@ -3,7 +3,6 @@ const Joi = require('joi');
 const moment = require('moment');
 const Subscription = require('../models/subscription');
 const APIError = require('../../utils/api-error');
-const { redisClient } = require('../../config/cache');
 const { subscriptionTypes, subscriptionFrequency, accountTypesEnum } = require('../../utils/enums');
 const { accountService } = require('./account');
 
@@ -44,20 +43,16 @@ const create = async (subscription) => {
   const { error, value } = schema.validate(subscription);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const newSubscription = await Subscription.create(value);
-  await redisClient.deleteList('subscriptions');
   return newSubscription;
 };
 
 const getAll = async (filters, isArray = true) => {
-  let subscriptions = await redisClient.getList('subscriptions');
-  if (subscriptions.length === 0) {
-    subscriptions = await Subscription.findAll({
-      raw: true,
-      nest: true,
-    });
-    await redisClient.setList('subscriptions', subscriptions);
-  }
-  if (filters) subscriptions = filter(subscriptions, filters);
+  const subscriptions = await Subscription.findAll({
+    raw: true,
+    nest: true,
+    where: { ...filters },
+  });
+
   if (!isArray) {
     return subscriptions[0];
   }
@@ -76,13 +71,11 @@ const update = async (id, payload) => {
   const updatedValue = await Subscription
     .update(value, { where: { id } });
   if (!updatedValue) throw new APIError({ message: 'No subscription found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('subscriptions');
   return updatedValue;
 };
 
 const remove = async (id) => {
   await Subscription.destroy({ where: { id }, limit: 1 });
-  await redisClient.deleteList('subscriptions');
 };
 
 const createUserSubscription = async ({ userId, accountId }, payload) => {
@@ -134,7 +127,6 @@ const updateUserSubscription = async ({ userId, subscriptionId }, payload) => {
   const updatedValue = await Subscription
     .update(value, { where: { id: subscriptionId, userId } });
   if (!updatedValue) throw new APIError({ message: 'No Subscription found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('creditCards');
   return updatedValue;
 };
 

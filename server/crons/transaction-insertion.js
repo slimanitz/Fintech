@@ -3,7 +3,6 @@ const { sequelize } = require('../config/database');
 const Transaction = require('../api/models/transaction');
 const rabbitMqClient = require('../config/rabbitmq');
 const { rabbitTopicsEnum } = require('../utils/enums');
-const { redisClient } = require('../config/cache');
 
 const transactionInsertionCron = cron.schedule('*/30 * * * * *', async () => {
   const { messages, channel } = await rabbitMqClient.consumeData(rabbitTopicsEnum.TRANSACTIONS);
@@ -14,7 +13,6 @@ const transactionInsertionCron = cron.schedule('*/30 * * * * *', async () => {
     await Transaction.bulkCreate(transactions, { transaction: t });
     await channel.ackAll();
     await t.commit();
-    await redisClient.deleteList('transactions');
   } catch (e) {
     await t.rollback();
     console.log(e.message);

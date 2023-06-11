@@ -18,8 +18,6 @@ const JWTCheck = (roles) => async (req, res, next) => {
       const cacheUserRole = await redisClient.get(token);
       if (cacheUserRole) {
         if (roles.includes(cacheUserRole)) {
-          await redisClient.set(token, cacheUserRole);
-          await redisClient.expire(token, 60000);
           return next();
         }
         res.sendStatus(httpStatus.UNAUTHORIZED);
