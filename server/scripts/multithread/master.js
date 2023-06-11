@@ -7,7 +7,7 @@ const User = require('../../api/models/user');
 const Account = require('../../api/models/account');
 const { userRolesEnum } = require('../../utils/enums');
 
-const NUMBER_OF_THREADS = 2;
+const NUMBER_OF_THREADS = 6;
 // Read all JSON file contents into an array
 
 function chunkArray(array, chunks) {
@@ -29,7 +29,7 @@ const main = async () => {
   await connect();
   const users = await User.findAll({
     where: { role: userRolesEnum.CLIENT, isActive: true },
-    limit: 40,
+    limit: 50,
     raw: true,
     nest: true,
   });
@@ -37,7 +37,7 @@ const main = async () => {
   const accounts = await Account.findAll({
     raw: true,
     nest: true,
-    limit: 10,
+    limit: 100,
     skip: random,
   });
   const threads = [];
