@@ -25,19 +25,18 @@ const main = async () => {
     role: 'CLIENT',
   });
 
-  for (let index = 0; index < 100; index++) {
+  for (let index = 0; index < 300; index++) {
     users.push({
       name: faker.name.fullName(),
       email: index + faker.internet.email().toLowerCase(),
       password: crypto.createHash('sha1').update('password', 'binary').digest('hex'),
-      role: Object
-        .values(userRolesEnum)[Math.floor(Math.random() * Object.values(userRolesEnum).length)],
+      role: userRolesEnum.CLIENT,
     });
   }
   users = await User.bulkCreate(users);
   console.log('Users created succesfully');
 
-  for (let index = 0; index < 300; index++) {
+  for (let index = 0; index < 600; index++) {
     accounts.push({
       userId: users[Math.floor(Math.random() * users.length)].id,
       type: Object
