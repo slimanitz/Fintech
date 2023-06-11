@@ -25,8 +25,6 @@ redisClient.getList = async (key) => {
   const list = await Promise.all(keysList
     .map(async (elementKey) => {
       const object = await redisClient.hgetall(elementKey);
-      if (object.isActive == '1') object.isActive = true;
-      if (object.isActive == '0') object.isActive = false;
       return object;
     }));
   return list;

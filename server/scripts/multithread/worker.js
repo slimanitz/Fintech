@@ -14,8 +14,6 @@ let totalRequests = 0;
 
 const simulation = async ({ email, password }, accounts) => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
     const start = Date.now();
     const instance = axios.create({
       baseURL: `${host}/api`,
@@ -40,8 +38,6 @@ const simulation = async ({ email, password }, accounts) => {
     // STEP3 Make 4  random transactions with bank accounts
 
     for (let index = 0; index < 10; index += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -61,8 +57,6 @@ const simulation = async ({ email, password }, accounts) => {
     // STEP4 make 4 random transactions with credit card
 
     for (let index = 0; index < 10; index += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -85,8 +79,6 @@ const simulation = async ({ email, password }, accounts) => {
     // STEP5 CREATE SUBSCRIPTION
 
     for (let index = 0; index < 2; index += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
