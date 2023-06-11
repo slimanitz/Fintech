@@ -4,7 +4,6 @@ const moment = require('moment');
 const app = require('./config/server');
 const { connect, sequelize } = require('./config/database');
 const { transactionGatewayEnum, accountTypesEnum, subscriptionFrequency } = require('./utils/enums');
-const { redisClient } = require('./config/cache');
 
 describe('Check before launching tests', () => {
   beforeAll(async () => {
@@ -16,7 +15,6 @@ describe('Check before launching tests', () => {
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
       await sequelize.sync({ force: true });
       await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-      await redisClient.flushall();
     }
     expect(process.env.APP_ENV).toEqual('test');
   }, 10000);
@@ -35,7 +33,6 @@ describe('Testing Client API Endpoints', () => {
   afterAll(() => {
     server.close();
     sequelize.close();
-    redisClient.quit();
   });
 
   const user = {

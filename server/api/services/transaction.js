@@ -3,7 +3,6 @@ const Joi = require('joi');
 const Transaction = require('../models/transaction');
 const APIError = require('../../utils/api-error');
 const { transactionGatewayEnum, transactionStatusEnum, accountTypesEnum } = require('../../utils/enums');
-const { redisClient } = require('../../config/cache');
 const { creditCardService } = require('./creditCard');
 const { accountService } = require('./account');
 
@@ -51,22 +50,18 @@ const create = async (transaction) => {
   const { error, value } = insertionSchema.validate(transaction);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const newTransaction = await Transaction.create(value);
-  await redisClient.deleteList('transactions');
   return newTransaction;
 };
 
 const getAll = async (filters, isArray = true) => {
-  let transactions = await redisClient.getList('transactions');
-  if (transactions.length === 0) {
-    transactions = await Transaction.findAll({
-      raw: true,
-      nest: true,
-    });
-    await redisClient.setList('transactions', transactions);
-  }
-  if (filters) { transactions = filter(transactions, filters); }
+  const transactions = await Transaction.findAll({
+    where: { ...filters },
+    raw: true,
+    nest: true,
+  });
+
   if (!isArray) {
-    return transactions[0] || null;
+    return transactions[0];
   }
   return transactions;
 };
@@ -82,13 +77,11 @@ const update = async (id, payload) => {
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await Transaction.update(value, { where: { id }, limit: 1 });
   if (!updatedValue) throw new APIError({ message: 'No transaction found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('transactions');
   return updatedValue;
 };
 
 const remove = async (id) => {
   await Transaction.destroy({ where: { id }, limit: 1 });
-  await redisClient.deleteList('transactions');
 };
 
 const createUserTransaction = async ({ userId, accountId }, payload) => {

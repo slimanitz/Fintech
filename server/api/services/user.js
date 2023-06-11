@@ -6,7 +6,6 @@ const User = require('../models/user');
 const APIError = require('../../utils/api-error');
 const { jwtSecret } = require('../../config/vars');
 const { userRolesEnum } = require('../../utils/enums');
-const { redisClient } = require('../../config/cache');
 
 const schema = Joi.object({
   name: Joi.string().required(),
@@ -22,33 +21,25 @@ const updateSchema = Joi.object({
   password: Joi.string(),
 });
 
-function filter(arr, criteria) {
-  return arr.filter((obj) => Object.keys(criteria).every((c) => obj[c] == criteria[c]));
-}
-
 const create = async (user) => {
   const { error, value } = schema.validate(user);
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   value.password = crypto.createHash('sha1').update(value.password, 'binary').digest('hex');
   const newUser = await User.create(value);
-  await redisClient.deleteList('users');
   return newUser;
 };
 
 const getAll = async (filters, isArray = true) => {
-  let users = await redisClient.getList('users');
+  const users = await User.findAll({
+    where: { ...filters },
+    raw: true,
+    nest: true,
+  });
 
-  if (users.length === 0) {
-    users = await User.findAll({
-      raw: true,
-      nest: true,
-    });
-    await redisClient.setList('users', users);
-  }
-  if (filters) { users = filter(users, filters); }
   if (!isArray) {
-    return users[0] || null;
-  } return users;
+    return users[0];
+  }
+  return users;
 };
 
 const get = async (id) => {
@@ -71,13 +62,11 @@ const update = async (id, payload) => {
   if (error) throw new APIError({ message: 'Bad Payload', status: httpStatus.BAD_REQUEST });
   const updatedValue = await User.update(value, { where: { id }, plain: true, returning: true });
   if (!updatedValue) throw new APIError({ message: 'No user found', status: httpStatus.NOT_FOUND });
-  await redisClient.deleteList('users');
   return updatedValue;
 };
 
 const remove = async (id) => {
   await User.destroy({ where: { id } });
-  await redisClient.deleteList('users');
 };
 
 module.exports.userService = {

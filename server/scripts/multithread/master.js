@@ -41,6 +41,7 @@ const main = async () => {
     skip: random,
   });
   const threads = [];
+  console.log(`Execution with ${users.length} users and ${accounts.length} accounts`);
 
   const chunks = chunkArray(users, NUMBER_OF_THREADS);
 
