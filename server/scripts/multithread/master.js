@@ -29,7 +29,7 @@ const main = async () => {
   await connect();
   const users = await User.findAll({
     where: { role: userRolesEnum.CLIENT, isActive: true },
-    limit: 100,
+    limit: 200,
     raw: true,
     nest: true,
   });
