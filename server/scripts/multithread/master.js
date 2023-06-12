@@ -22,8 +22,6 @@ function chunkArray(array, chunks) {
 }
 
 const main = async () => {
-  // Divide the content into two chunks
-
   const pool = new Piscina({ filename: resolve(__dirname, 'worker.js') });
   await connect();
   const users = await User.findAll({
@@ -46,7 +44,7 @@ const main = async () => {
     threads.push(pool.run({ users: element, accounts }));
   });
 
-  // Run operation on the chunks parallely
+  // Run operation on the chunks in parallel
   const result = await Promise.all(threads);
   console.log(result);
   process.exit();
