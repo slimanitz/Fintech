@@ -7,8 +7,7 @@ const User = require('../../api/models/user');
 const Account = require('../../api/models/account');
 const { userRolesEnum } = require('../../utils/enums');
 
-const NUMBER_OF_THREADS = 6;
-// Read all JSON file contents into an array
+const NUMBER_OF_THREADS = 8;
 
 function chunkArray(array, chunks) {
   const chunkSize = Math.ceil(array.length / chunks); // calculate the size of each chunk
