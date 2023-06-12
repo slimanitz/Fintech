@@ -104,6 +104,7 @@ const simulation = async ({ email, password }, accounts) => {
       rate: requestSuccess / totalRequests,
     };
   } catch (e) {
+    console.log(e.message);
     return { delay: 0, success: `${requestSuccess}/${totalRequests}` };
   }
 };
