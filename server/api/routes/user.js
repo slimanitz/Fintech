@@ -31,14 +31,14 @@ router.delete('/:id', remove);
 // Accounts
 router.post('/:userId/accounts', JWTCheck([userRolesEnum.CLIENT]), createUserAccount);
 router.get('/:userId/accounts', JWTCheck([userRolesEnum.CLIENT]), getAllUserAccounts);
-router.get('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, getUserAccount);
-router.patch('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, updateUserAccount);
+router.get('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), getUserAccount);
+router.patch('/:userId/accounts/:accountId', JWTCheck([userRolesEnum.CLIENT]), updateUserAccount);
 
 // Credit cards
-router.post('/:userId/accounts/:accountId/credit-cards', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, createUserCreditCard);
+router.post('/:userId/accounts/:accountId/credit-cards', JWTCheck([userRolesEnum.CLIENT]), createUserCreditCard);
 router.get('/:userId/credit-cards', JWTCheck([userRolesEnum.CLIENT]), getAllUserCreditCards);
-router.get('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, getUserCreditCard);
-router.patch('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), coherenceCheck, updateUserCreditCard);
+router.get('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), getUserCreditCard);
+router.patch('/:userId/credit-cards/:creditCardId', JWTCheck([userRolesEnum.CLIENT]), updateUserCreditCard);
 
 // Transactions
 router.post('/:userId/accounts/:accountId/transactions', JWTCheck([userRolesEnum.CLIENT]), createUserTransaction);
