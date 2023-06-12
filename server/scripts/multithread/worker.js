@@ -37,7 +37,7 @@ const simulation = async ({ email, password }, accounts) => {
 
     // STEP3 Make 4  random transactions with bank accounts
 
-    for (let index = 0; index < 10; index += 1) {
+    for (let index = 0; index < 50; index += 1) {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
@@ -56,7 +56,7 @@ const simulation = async ({ email, password }, accounts) => {
 
     // STEP4 make 4 random transactions with credit card
 
-    for (let index = 0; index < 10; index += 1) {
+    for (let index = 0; index < 50; index += 1) {
       const creditAcccount = accounts[Math.floor(Math.random() * accounts.length)];
 
       const payload = {
