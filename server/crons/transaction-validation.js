@@ -48,7 +48,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
           { status: transactionStatusEnum.REFUSED },
           { where: { id: transaction.id } },
         );
-        console.log('step 1');
         return false;
       }
       const creditAccount = await Account.findByPk(transaction.creditAccountId);
@@ -57,7 +56,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
           { status: transactionStatusEnum.REFUSED },
           { where: { id: transaction.id } },
         );
-        console.log('step 2');
         return false;
       }
       if (transaction.gateway == transactionGatewayEnum.DEPOSIT) {
@@ -90,7 +88,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('step 3');
           return false;
         }
         if (((creditCard.allowedLimit - creditCard.limitUsage) < amount)) {
@@ -98,7 +95,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('step 4');
           return false;
         }
         if (debitAccount.balance < amount) {
@@ -106,7 +102,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('step 5');
           return false;
         }
         const t = await sequelize.transaction();
@@ -148,7 +143,6 @@ const transactionCron = cron.schedule('*/10 * * * * *', async () => {
             { status: transactionStatusEnum.REFUSED },
             { where: { id: transaction.id } },
           );
-          console.log('step 6');
           return false;
         }
         const t = await sequelize.transaction();
